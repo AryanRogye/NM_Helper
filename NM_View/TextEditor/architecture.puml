@@ -1,0 +1,108 @@
+@startuml
+title TextEditor Module Overview
+
+interface EditorCommands {
+    +toggleBold()
+    +increaseFontOrZoomIn()
+    +decreaseFontOrZoomOut()
+}
+
+interface BufferView {
+    +onUpdateInsertionPoint
+    +getString()
+    +deleteUnderCursor()
+    +setTextView(textView)
+}
+
+class NSTextViewBufferAdapter {
+    +textView
+    +onUpdateInsertionPoint
+    +setTextView()
+    +updateInsertionPoint()
+}
+NSTextViewBufferAdapter ..|> BufferView
+
+class VimEngine {
+    +state
+    +isInVimMode
+    +motionEngine
+    +buffer
+    +handleVimEvent(event)
+}
+
+class MotionEngine
+
+class ComfyTextEditor {
+    +text : Binding<String>
+    +font : Binding<CGFloat>
+    +magnification : Binding<CGFloat>
+    +isInVimMode : Binding<Bool>
+    +showScrollbar : Binding<Bool>
+    +onReady(EditorCommands)
+}
+
+class TextViewController {
+    +vimEngine
+    +scrollView
+    +textView
+    +vimBottomView
+    +textViewDelegate
+    +magnificationDelegate
+}
+TextViewController ..|> EditorCommands
+
+class ComfyScrollView
+class ComfyTextView {
+    +vimEngine
+}
+class VimBottomView {
+    +vimEngine
+}
+
+class TextViewDelegate {
+    +vimEngine
+    +textBinding
+    +fontBinding
+    +boldBinding
+    +observeTextChange()
+    +observeFontChange()
+    +observeBoldUnderCursor()
+    +toggleBold(in:)
+}
+
+class MagnificationDelegate {
+    +magnificationBinding
+    +scrollView(didChangeMagnification:)
+}
+
+class BindingString
+class BindingCGFloat
+class BindingBool
+
+ComfyTextEditor ..> TextViewController : wraps
+ComfyTextEditor --> EditorCommands : onReady
+
+TextViewController *-- VimEngine
+TextViewController *-- ComfyScrollView
+TextViewController *-- ComfyTextView
+TextViewController *-- VimBottomView
+TextViewController *-- TextViewDelegate
+TextViewController *-- MagnificationDelegate
+
+ComfyScrollView --> MagnificationDelegate
+ComfyTextView --> TextViewDelegate
+ComfyTextView --> VimEngine
+VimBottomView --> VimEngine
+
+VimEngine *-- MotionEngine
+VimEngine --> BufferView
+VimEngine --> NSTextViewBufferAdapter : default buffer
+
+TextViewDelegate --> VimEngine
+TextViewDelegate --> BindingString : text
+TextViewDelegate --> BindingCGFloat : font size
+TextViewDelegate --> BindingBool : bold state
+
+MagnificationDelegate --> BindingCGFloat : magnification
+
+@enduml

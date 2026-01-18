@@ -1,0 +1,47 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# Xcode
+DerivedData/
+*.xcuserstate
+*.xcuserdata/
+*.xcuserdatad/
+*.moved-aside
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcworkspace/xcuserdata/
+*.xcresult
+
+# SwiftPM
+.swiftpm/
+.build/
+
+# Build outputs
+build/
+NM_View/CoreNative/
+
+# Go
+*.a
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+bin/
+
+# Legacy Rust artifacts (if present)
+NM_Core/target/
+
+# SwiftData / CoreData stores (if generated in repo)
+*.store
+*.store-shm
+*.store-wal
+
+# Logs / temp
+*.log
+*.tmp
