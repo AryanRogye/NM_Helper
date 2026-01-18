@@ -30,22 +30,25 @@ final class ComfyTextView: NSTextView {
         self.addSubview(vimCursorView)
     }
     
-    public func updateHighlightedRanges(range: NSRange) {
+    public func updateHighlightedRanges(range: NSRange, filterText: String) {
         guard let storage = self.textStorage else { return }
         
-        var lineRange: NSRange?
+        let matchLen = (filterText as NSString).length
+        let matchRange = NSRange(location: range.location, length: matchLen)
         
         storage.beginEditing()
-        if range.location >= 0, range.location + range.length <= storage.length {
-            let lr = (storage.string as NSString).lineRange(for: range)
-            storage.addAttribute(.backgroundColor,
-                                 value: NSColor.selectedTextBackgroundColor.withAlphaComponent(0.4),
-                                 range: lr)
-            lineRange = lr
+        
+        if matchRange.location >= 0,
+           matchRange.location + matchRange.length <= storage.length {
+            storage.addAttribute(
+                .backgroundColor,
+                value: NSColor.selectedTextBackgroundColor.withAlphaComponent(0.4),
+                range: matchRange
+            )
         }
+        
         storage.endEditing()
     }
-
     
     public func resetHighlightedRanges() {
         guard let storage = self.textStorage else { return }

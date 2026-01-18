@@ -38,6 +38,7 @@ final class NMViewModel {
     var isLoadingChunks = false
     
     var searchIndexs: [Int] = []
+    var filterText: String = ""
 
     var scanTask: Task<Void, Never>?
     var searchTask: Task<Void, Never>?
@@ -65,6 +66,7 @@ final class NMViewModel {
         self.isNMScanning = false
         self.isLoadingChunks = false
         self.searchIndexs.removeAll()
+        self.filterText = ""
     }
 }
 
@@ -76,6 +78,7 @@ extension NMViewModel {
         searchTask?.cancel()
         self.searchIndexs.removeAll()
         
+        filterText = filter
         let chunks = selectedChunks.joined()
         
         searchTask = Task.detached(priority: .userInitiated) { [weak self] in

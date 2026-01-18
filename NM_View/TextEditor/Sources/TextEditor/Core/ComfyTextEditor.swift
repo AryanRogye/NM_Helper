@@ -9,11 +9,12 @@ import SwiftUI
 
 public struct ComfyTextEditor: NSViewControllerRepresentable {
 
-    @State private var bottomStatus = BottomStatusModel()
+    @State private var highlightModel = HighlightModel()
     /// Text to type into
     @Binding var text: String
     @Binding var chunks: [String]
     var highlightIndexRows: Binding<[Int]>?
+    var filterText: Binding<String>?
     
     var useChunks: Bool
     
@@ -50,6 +51,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         chunks: Binding<[String]>,
         useChunks: Bool,
         highlightIndexRows: Binding<[Int]>? = nil,
+        filterText: Binding<String>? = nil,
         font: Binding<CGFloat> = .constant(0),
         isBold: Binding<Bool>,
         magnification: Binding<CGFloat> = .constant(1),
@@ -64,6 +66,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
     ) {
         self.useChunks = useChunks
         self.highlightIndexRows = highlightIndexRows
+        self.filterText = filterText
         self.onReady = onReady
         self.onSave = onSave
         self._text = text
@@ -95,6 +98,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
             chunks: .constant([]),
             useChunks: false,
             highlightIndexRows: nil,
+            filterText: nil,
             font: .constant(0),
             isBold: .constant(false),
             magnification: .constant(1),
@@ -113,6 +117,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
     public init(
         chunks: Binding<[String]>,
         highlightIndexRows: Binding<[Int]>? = nil,
+        filterText: Binding<String>? = nil,
         showScrollbar: Binding<Bool>,
         isInVimMode: Binding<Bool> = .constant(false),
         editorBackground: Color = .white,
@@ -125,6 +130,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
             chunks: chunks,
             useChunks: true,
             highlightIndexRows: highlightIndexRows,
+            filterText: filterText,
             font: .constant(0),
             isBold: .constant(false),
             magnification: .constant(1),
@@ -144,7 +150,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
             foregroundStyle       : editorForegroundStyle,
             textViewDelegate      : textViewDelegate,
             magnificationDelegate : magnificationDelegate,
-            bottomStatus          : bottomStatus,
+            highlightModel        : highlightModel,
             onSave                : onSave
         )
         onReady(viewController)
@@ -178,13 +184,13 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         
         if useChunks {
             
-            if let highlightIndexRows {
+            if let highlightIndexRows, let filterText {
                 let indices = highlightIndexRows.wrappedValue
-                if indices != bottomStatus.indices {
-                    bottomStatus.resetHighlightedRanges()
-                    bottomStatus.indices = highlightIndexRows.wrappedValue
-                    bottomStatus.indices.forEach {
-                        bottomStatus.highlight($0)
+                if indices != highlightModel.indices {
+                    highlightModel.resetHighlightedRanges()
+                    highlightModel.indices = highlightIndexRows.wrappedValue
+                    highlightModel.indices.forEach {
+                        highlightModel.highlight($0, filterText: filterText.wrappedValue)
                     }
                 }
             }

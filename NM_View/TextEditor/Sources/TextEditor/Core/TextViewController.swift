@@ -23,15 +23,14 @@ public class TextViewController: NSViewController, EditorCommands {
     /// Our Implementation of a NSTextView
     lazy var textView = ComfyTextView(vimEngine: vimEngine)
     
-    let bottomStatus: BottomStatusModel
+    let highlightModel: HighlightModel
 
     /// Foreground Style
     let foregroundStyle: Color
     /// Bottom Bar for Vim Command Input, etc
     lazy var vimBottomView = VimBottomView(
         vimEngine: vimEngine,
-        foregroundStyle: foregroundStyle,
-        bottomStatus: bottomStatus
+        foregroundStyle: foregroundStyle
     )
 
     // MARK: - Delegates
@@ -51,18 +50,18 @@ public class TextViewController: NSViewController, EditorCommands {
         foregroundStyle       : Color,
         textViewDelegate      : TextViewDelegate,
         magnificationDelegate : MagnificationDelegate,
-        bottomStatus          : BottomStatusModel,
+        highlightModel          : HighlightModel,
         onSave                : @escaping () -> Void
     ) {
         self.foregroundStyle = foregroundStyle
         self.textViewDelegate = textViewDelegate
         self.magnificationDelegate = magnificationDelegate
-        self.bottomStatus = bottomStatus
+        self.highlightModel = highlightModel
         
         super.init(nibName: nil, bundle: nil)
         
-        bottomStatus.updateHighlightedRanges = updateHighlightedRanges
-        bottomStatus.resetHighlightedRanges = resetHighlightedRanges
+        highlightModel.updateHighlightedRanges = updateHighlightedRanges
+        highlightModel.resetHighlightedRanges = resetHighlightedRanges
 
         /// Assign On Save Values
         vimEngine.onSave = onSave
@@ -76,8 +75,8 @@ public class TextViewController: NSViewController, EditorCommands {
         }
     }
     
-    public func updateHighlightedRanges(range: NSRange) {
-        self.textView.updateHighlightedRanges(range: range)
+    public func updateHighlightedRanges(range: NSRange, filterText: String) {
+        self.textView.updateHighlightedRanges(range: range, filterText: filterText)
     }
     public func resetHighlightedRanges() {
         self.textView.resetHighlightedRanges()

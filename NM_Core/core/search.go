@@ -10,6 +10,7 @@ const (
 )
 
 // We Will be using Boyer-Moore for pattern matching
+// https://www.geeksforgeeks.org/dsa/boyer-moore-algorithm-for-pattern-searching/
 // My First Time ever Implementing this algorithm, should be fun!
 
 // Dont know yet what the output will be just learning the algorithm

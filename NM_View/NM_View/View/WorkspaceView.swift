@@ -67,6 +67,7 @@ extension WorkspaceView {
         ComfyTextEditor(
             chunks: chunksBinding,
             highlightIndexRows: $vm.searchIndexs,
+            filterText: $vm.filterText,
             showScrollbar: .constant(false)
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)

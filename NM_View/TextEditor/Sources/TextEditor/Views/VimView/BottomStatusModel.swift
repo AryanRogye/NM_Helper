@@ -9,18 +9,18 @@ import Foundation
 
 @Observable
 @MainActor
-final class BottomStatusModel {
+final class HighlightModel {
     var indices: [Int] = []
     
-    var updateHighlightedRanges: ((NSRange) -> Void) = { range in }
+    var updateHighlightedRanges: ((NSRange, String) -> Void) = { _, _ in }
     var resetHighlightedRanges: () -> Void = { }
     
     func rangeFor(index: Int) -> NSRange {
         return NSRange(location: index, length: 1)
     }
     
-    public func highlight(_ index: Int) {
+    public func highlight(_ index: Int, filterText: String) {
         let r = rangeFor(index: index)
-        updateHighlightedRanges(r)
+        updateHighlightedRanges(r, filterText)
     }
 }
