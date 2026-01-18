@@ -18,6 +18,11 @@ func nm_free(ptr *C.char) {
 	C.free(unsafe.Pointer(ptr))
 }
 
+//export nm_free_int
+func nm_free_int(ptr []int) {
+	C.free(unsafe.Pointer(&ptr[0]))
+}
+
 //export nm_scan_file
 func nm_scan_file(filename *C.char) *C.char {
 	out := api.ScanFile(C.GoString(filename))
@@ -25,7 +30,7 @@ func nm_scan_file(filename *C.char) *C.char {
 }
 
 //export nm_grep
-func nm_grep(searchIn *C.char, word *C.char) []int {
+func nm_grep(searchIn *C.char, word *C.char, out_size *C.int) *C.int {
 	s := core.Search{
 		SearchIn: C.GoString(searchIn),
 		Query:    C.GoString(word),
@@ -33,14 +38,21 @@ func nm_grep(searchIn *C.char, word *C.char) []int {
 	r, err := s.Search()
 
 	if err != nil {
-		return []int{}
+		*out_size = 0
+		return nil
 	}
 
-	var results []int
-	for _, result := range r {
-		results = append(results, result)
+	// we need to allocate on the heap but the C heap
+	ptr := (*C.int)(C.malloc(C.size_t(len(r)) * C.size_t(unsafe.Sizeof(C.int(0)))))
+
+	arr := unsafe.Slice(ptr, len(r))
+
+	for i, v := range r {
+		arr[i] = C.int(v)
 	}
-	return results
+
+	*out_size = C.int(len(r))
+	return ptr
 }
 
 func main() {}

@@ -14,22 +14,27 @@ final class VimBottomView: NSView {
     var vimEngine : VimEngine
     
     private let topBorder = CALayer()
+    
     private var borderThickness: CGFloat = 1
     
     var foregroundStyle: Color
+    var bottomStatus: BottomStatusModel
     lazy var vimStatusVM = VimStatusViewModel(foregroundStyle: foregroundStyle)
     
     lazy var vimStatusView = VimStatus(
         vimEngine: vimEngine,
-        vimStatusVM: vimStatusVM
+        vimStatusVM: vimStatusVM,
+        bottomStatus: bottomStatus
     )
 
     init(
         vimEngine: VimEngine,
-        foregroundStyle: Color
+        foregroundStyle: Color,
+        bottomStatus: BottomStatusModel
     ) {
         self.vimEngine = vimEngine
         self.foregroundStyle = foregroundStyle
+        self.bottomStatus = bottomStatus
         super.init(frame: .zero)
         
         translatesAutoresizingMaskIntoConstraints = false

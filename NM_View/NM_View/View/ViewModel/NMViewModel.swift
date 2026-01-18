@@ -74,6 +74,7 @@ extension NMViewModel {
         
         if filter.isEmpty { return }
         searchTask?.cancel()
+        self.searchIndexs.removeAll()
         
         let chunks = selectedChunks.joined()
         
@@ -86,14 +87,19 @@ extension NMViewModel {
             filter.withCString { cStr in
                 chunks.withCString { searchCStr in
                     
-                    
-                    let goSlice = nm_grep(
+                    var outSize: Int32 = 0
+
+                    if let ptr = nm_grep(
                         UnsafeMutablePointer<CChar>(mutating: searchCStr),
-                        UnsafeMutablePointer<CChar>(mutating: cStr)
-                    )
-                    
-                    indices = GoHelpers.goSliceToInts(goSlice)
-                    
+                        UnsafeMutablePointer<CChar>(mutating: cStr),
+                        &outSize
+                    ) {
+                        
+                        for i in 0..<Int(outSize) {
+                            indices.append(Int(ptr[i]))
+                        }
+                        free(ptr)
+                    }
                 }
             }
             
@@ -102,6 +108,7 @@ extension NMViewModel {
             
             await MainActor.run { [indices] in
                 self.searchIndexs = indices
+                print("Updated Search Index's Count: \(indices.count)")
             }
         }
     }

@@ -19,6 +19,7 @@ struct VimStatus: View {
     
     @ObservedObject var vimEngine: VimEngine
     @ObservedObject var vimStatusVM : VimStatusViewModel
+    @Bindable var bottomStatus: BottomStatusModel
     
     /// This is dependent on if vim is enabled or not
     var opacity: CGFloat {
@@ -61,6 +62,28 @@ struct VimStatus: View {
                     }
             }
             Spacer()
+            
+            if bottomStatus.indices.isEmpty {
+                Text("Filter is empty")
+            } else {
+                ScrollView([.horizontal], showsIndicators: false) {
+                    LazyHStack(spacing: 8) {
+                        let sorted = bottomStatus.indices.sorted()
+                        ForEach(sorted, id: \.self) { index in
+                            Text("\(index)")
+                                .foregroundStyle(.primary)
+                                .font(.caption.monospaced())
+                                .padding(4)
+                                .background {
+                                    Capsule()
+                                        .fill(.regularMaterial)
+                                }
+                        }
+                    }
+                }
+            }
+            
+            Spacer()
             Text("Line: \(vimEngine.position.map { String($0.line) } ?? "_")  Col: \(vimEngine.position.map { String($0.column) } ?? "_")")
                 .font(.system(size: 12, weight: .regular, design: .rounded))
                 .foregroundStyle(vimStatusVM.foregroundStyle)
@@ -81,7 +104,14 @@ struct VimStatus: View {
     
     let test: (VimEngine) -> some View = { engine in
         HStack {
-            VimStatus(vimEngine: engine, vimStatusVM: VimStatusViewModel(foregroundStyle: .white))
+            VimStatus(
+                vimEngine: engine,
+                vimStatusVM: VimStatusViewModel(
+                    foregroundStyle: .white,
+                    
+                ),
+                bottomStatus: BottomStatusModel()
+            )
             Spacer()
         }
         .border(Color.black)

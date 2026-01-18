@@ -29,6 +29,30 @@ final class ComfyTextView: NSTextView {
     public func setupCursorView() {
         self.addSubview(vimCursorView)
     }
+    
+    public func updateHighlightedRanges(range: NSRange) {
+        guard let storage = self.textStorage else { return }
+        
+        var lineRange: NSRange?
+        
+        storage.beginEditing()
+        if range.location >= 0, range.location + range.length <= storage.length {
+            let lr = (storage.string as NSString).lineRange(for: range)
+            storage.addAttribute(.backgroundColor,
+                                 value: NSColor.selectedTextBackgroundColor.withAlphaComponent(0.4),
+                                 range: lr)
+            lineRange = lr
+        }
+        storage.endEditing()
+    }
+
+    
+    public func resetHighlightedRanges() {
+        guard let storage = self.textStorage else { return }
+        let full = NSRange(location: 0, length: storage.length)
+        storage.removeAttribute(.backgroundColor, range: full)
+    }
+
 
     override func drawInsertionPoint(in rect: NSRect, color: NSColor, turnedOn flag: Bool) {
         // If the blink cycle is off, don't draw anything

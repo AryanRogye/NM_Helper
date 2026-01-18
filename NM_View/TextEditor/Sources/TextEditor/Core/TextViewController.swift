@@ -22,11 +22,17 @@ public class TextViewController: NSViewController, EditorCommands {
     let scrollView = ComfyScrollView()
     /// Our Implementation of a NSTextView
     lazy var textView = ComfyTextView(vimEngine: vimEngine)
+    
+    let bottomStatus: BottomStatusModel
 
     /// Foreground Style
     let foregroundStyle: Color
     /// Bottom Bar for Vim Command Input, etc
-    lazy var vimBottomView = VimBottomView(vimEngine: vimEngine, foregroundStyle: foregroundStyle)
+    lazy var vimBottomView = VimBottomView(
+        vimEngine: vimEngine,
+        foregroundStyle: foregroundStyle,
+        bottomStatus: bottomStatus
+    )
 
     // MARK: - Delegates
     /// Text Delegate
@@ -45,14 +51,19 @@ public class TextViewController: NSViewController, EditorCommands {
         foregroundStyle       : Color,
         textViewDelegate      : TextViewDelegate,
         magnificationDelegate : MagnificationDelegate,
+        bottomStatus          : BottomStatusModel,
         onSave                : @escaping () -> Void
     ) {
         self.foregroundStyle = foregroundStyle
         self.textViewDelegate = textViewDelegate
         self.magnificationDelegate = magnificationDelegate
+        self.bottomStatus = bottomStatus
         
         super.init(nibName: nil, bundle: nil)
         
+        bottomStatus.updateHighlightedRanges = updateHighlightedRanges
+        bottomStatus.resetHighlightedRanges = resetHighlightedRanges
+
         /// Assign On Save Values
         vimEngine.onSave = onSave
         
@@ -63,6 +74,13 @@ public class TextViewController: NSViewController, EditorCommands {
         vimEngine.buffer.onUpdateInsertionPoint = {
             textViewDelegate.refresh()
         }
+    }
+    
+    public func updateHighlightedRanges(range: NSRange) {
+        self.textView.updateHighlightedRanges(range: range)
+    }
+    public func resetHighlightedRanges() {
+        self.textView.resetHighlightedRanges()
     }
 
     required init?(coder: NSCoder) {
