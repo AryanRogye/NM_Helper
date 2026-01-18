@@ -20,7 +20,7 @@ struct Sidebar: View {
                     .font(.headline)
                 Spacer()
                 Button {
-                    vm.currentScreen = .addView
+                    vm.switchScreens(to: .addView)
                 } label: {
                     Image(systemName: "plus")
                 }

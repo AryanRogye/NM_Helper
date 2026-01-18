@@ -27,6 +27,7 @@ final class NMViewModel {
     /// Current Screen
     var currentScreen: Screens = .addView
     
+    /// Current Workspace Stuff
     var selectedWorkspace: Workspace?
     var selectedChunks: [String] = []
     
@@ -36,7 +37,74 @@ final class NMViewModel {
     var isNMScanning = false
     var isLoadingChunks = false
     
+    var searchIndexs: [Int] = []
+
+    var scanTask: Task<Void, Never>?
+    var searchTask: Task<Void, Never>?
     
+    /// Switch Screen
+    public func switchScreens(to screen: Screens) {
+        
+        /// if on home, and screen requested is add, and we have a task thats started
+        if currentScreen == .home,
+           screen == .addView {
+            self.clearWorkspace()
+        }
+        
+        currentScreen = screen
+    }
+    
+    /// Clear Workspace
+    private func clearWorkspace() {
+        self.scanTask?.cancel()
+        self.searchTask?.cancel()
+        self.selectedWorkspace = nil
+        self.selectedChunks.removeAll()
+        self.selectedSize = nil
+        self.selectedMaxSize = nil
+        self.isNMScanning = false
+        self.isLoadingChunks = false
+        self.searchIndexs.removeAll()
+    }
+}
+
+// MARK: - Search
+extension NMViewModel {
+    public func searchFilter(_ filter: String) {
+        
+        if filter.isEmpty { return }
+        searchTask?.cancel()
+        
+        let chunks = selectedChunks.joined()
+        
+        searchTask = Task.detached(priority: .userInitiated) { [weak self] in
+            
+            if Task.isCancelled { return }
+            
+            var indices : [Int] = []
+            /// Convert to C String
+            filter.withCString { cStr in
+                chunks.withCString { searchCStr in
+                    
+                    
+                    let goSlice = nm_grep(
+                        UnsafeMutablePointer<CChar>(mutating: searchCStr),
+                        UnsafeMutablePointer<CChar>(mutating: cStr)
+                    )
+                    
+                    indices = GoHelpers.goSliceToInts(goSlice)
+                    
+                }
+            }
+            
+            if Task.isCancelled { return }
+            guard let self else { return }
+            
+            await MainActor.run { [indices] in
+                self.searchIndexs = indices
+            }
+        }
+    }
 }
 
 // MARK: - Workspace
@@ -65,10 +133,13 @@ extension NMViewModel {
 
 // MARK: - NM
 extension NMViewModel {
+    
     public func nmSelect(_ url: URL) {
         
         if isNMScanning { return }
         if isLoadingChunks { return }
+        
+        scanTask?.cancel()
         
         let path = url.path
         isNMScanning = true
@@ -76,7 +147,21 @@ extension NMViewModel {
         selectedChunks.removeAll()
         selectedMaxSize = nil
         
-        Task.detached(priority: .userInitiated) { [path] in
+        let chunkSize = self.chunkSize
+        
+        scanTask = Task.detached(priority: .userInitiated) { [path] in
+            
+            /// Set whats gonna happen on exit
+            defer {
+                Task { @MainActor in
+                    self.isNMScanning = false
+                    self.isLoadingChunks = false
+                }
+            }
+            
+            /// Cancel task
+            if Task.isCancelled { return }
+            
             let result: String = path.withCString { cStr in
                 let mut = UnsafeMutablePointer<CChar>(mutating: cStr)
                 guard let out = nm_scan_file(mut) else { return "" }
@@ -84,40 +169,56 @@ extension NMViewModel {
                 return String(cString: out)
             }
             
+            if Task.isCancelled { return }
+
             await MainActor.run { [result] in
                 /// Create a workspace
                 self.selectedWorkspace = Workspace(file: url)
                 self.selectedMaxSize = result.count
+                
+                /// Scanning is done, chunking still remains
                 self.isNMScanning = false
             }
+            
             
             let full = result
             var i = full.startIndex
             
             while i < full.endIndex {
                 
-                let next = full.index(
-                    i,
-                    offsetBy: self.chunkSize,
-                    limitedBy:
-                        full.endIndex
-                ) ?? full.endIndex
+                if Task.isCancelled { return }
                 
-                let chunk = String(full[i..<next])
-                i = next
+                var batch: [String] = []
+                var batchSize = 0
+                let batchCount = 10
                 
-                await MainActor.run {
-                    print("Appending")
-                    self.selectedChunks.append(chunk)
-                    self.selectedSize = (self.selectedSize ?? 0) + chunk.count
+                for _ in 0..<batchCount {
+                    
+                    if Task.isCancelled { return }
+                    
+                    let next = full.index(
+                        i,
+                        offsetBy: chunkSize,
+                        limitedBy:
+                            full.endIndex
+                    ) ?? full.endIndex
+                    
+                    let chunk = String(full[i..<next])
+                    i = next
+                    batch.append(chunk)
+                    batchSize += chunk.count
                 }
                 
-                try? await Task.sleep(nanoseconds: 30_000_000) // 30ms, tweak
+                await MainActor.run { [batch, batchSize] in
+                    self.selectedChunks.append(contentsOf: batch)
+                    self.selectedSize = (self.selectedSize ?? 0) + batchSize
+                }
+                
+                try? await Task.sleep(nanoseconds: 10_000_000) // 30ms, tweak
             }
             
             await MainActor.run {
                 self.isLoadingChunks = false
-                print("Done Loading Chunks")
             }
         }
     }

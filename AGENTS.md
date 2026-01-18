@@ -24,6 +24,9 @@
 - Swift: follow standard Xcode formatting (4 spaces, type names in `UpperCamelCase`, methods/vars in `lowerCamelCase`).
 - Go: use `gofmt`; keep cgo exports with `//export name` directly above the function, and use C types (`*C.char`, `C.int`).
 - Files are grouped by feature (e.g., `View/Components`, `ViewModel`).
+- Prefer clean, readable code.
+- ViewModels: structure with `// MARK:` sections and extensions that tell a clear story.
+- Views: keep `var body: some View` small and concise; push subviews into `private var` blocks.
 
 ## Testing Guidelines
 - No app-level test suite is currently configured.
