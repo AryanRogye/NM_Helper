@@ -22,9 +22,13 @@ final class TextViewDelegate: NSObject, NSTextViewDelegate, ObservableObject {
     var text: Binding<String> = .constant("")
     var font: Binding<CGFloat> = .constant(0)
     var isBold: Binding<Bool> = .constant(false)
+    var allowEdit: Binding<Bool> = .constant(true)
     
     public func observeCurrentIndex(_ val: Binding<Int?>) {
         self.currentIndex = val
+    }
+    public func observeAllowEdit(_ val: Binding<Bool>) {
+        self.allowEdit = val
     }
     public func observeTextChange(_ val: Binding<String>) {
         self.text = val
@@ -66,6 +70,14 @@ final class TextViewDelegate: NSObject, NSTextViewDelegate, ObservableObject {
         calculateRange(textView)
         guard let vimEngine else { return }
         vimEngine.updatePosition()
+    }
+
+    func textView(
+        _ textView: NSTextView,
+        shouldChangeTextIn affectedCharRange: NSRange,
+        replacementString: String?
+    ) -> Bool {
+        allowEdit.wrappedValue
     }
 
     /// Calulating Range is the same as when our cursor updates

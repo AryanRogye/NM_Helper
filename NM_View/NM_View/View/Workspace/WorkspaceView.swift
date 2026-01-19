@@ -7,14 +7,16 @@
 
 import SwiftUI
 import TextEditor
+import nmcore
 
 struct WorkspaceView: View {
-    
     @Bindable var vm: NMViewModel
     @Bindable var workspace: Workspace
-    
+
     @State private var searchQuery: String = ""
-    
+    @State private var currentFlags: [NMFlags] = []
+    @State private var isSearchFieldFocused = false
+
     var body: some View {
         rootView
     }
@@ -48,20 +50,21 @@ extension WorkspaceView {
 // MARK: - Components
 extension WorkspaceView {
     private var emptyStateView: some View {
-        HStack {
-            Text("File: \(workspace.file)")
-            Button("Load") {
-                vm.nmSelect(workspace.file)
+        WorkspaceEmptyStateView(
+            workspace: workspace,
+            currentFlags: $currentFlags,
+            onLoad: {
+                vm.nmSelect(workspace.file, flags: currentFlags)
             }
-        }
+        )
     }
-    
+
     private var editorContainerView: some View {
         ZStack {
             editorView
         }
     }
-    
+
     private var editorView: some View {
         ComfyTextEditor(
             chunks: chunksBinding,
@@ -70,11 +73,17 @@ extension WorkspaceView {
             currentIndex: $vm.currentIndex,
             allowEdit: $vm.allowEdit,
             showScrollbar: .constant(false),
+            isInVimMode: $vm.isInVimMode,
             onHighlightUpdated: { highlight in
                 vm.searchPercentageDone = highlight
             },
             onHighlight: { highlightCommands in
                 vm.highlightCommands = highlightCommands
+            },
+            onSearchRequested: {
+                DispatchQueue.main.async {
+                    isSearchFieldFocused = true
+                }
             }
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -83,80 +92,41 @@ extension WorkspaceView {
 
 // MARK: - Toolbar
 extension WorkspaceView {
-    
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         if !vm.isLoadingChunks && !vm.selectedChunks.isEmpty {
             ToolbarItem(placement: .automatic) {
-                searchFieldView
+                WorkspaceSearchFieldView(
+                    query: $searchQuery,
+                    isFocused: $isSearchFieldFocused,
+                    progress: searchProgressFraction,
+                    onQueryChange: { newValue in
+                        vm.searchFilter(newValue)
+                    }
+                )
             }
         }
         if vm.isLoadingChunks,
            let selectedSize = vm.selectedSize,
            let selectedMaxSize = vm.selectedMaxSize {
             ToolbarItem(placement: .automatic) {
-                progressToolbarView(selectedSize: selectedSize, selectedMaxSize: selectedMaxSize)
+                WorkspaceProgressToolbarView(
+                    selectedSize: selectedSize,
+                    selectedMaxSize: selectedMaxSize
+                )
             }
         }
     }
-    
-    private func progressToolbarView(selectedSize: Int, selectedMaxSize: Int) -> some View {
-        ProgressView(value: CGFloat(selectedSize), total: CGFloat(selectedMaxSize)) {
-            let percent = (Double(selectedSize) / Double(selectedMaxSize)) * 100
-            Text("\(Int(percent))%")
-        }
-        .progressViewStyle(CircularProgressStyle())
-        .frame(width: 60, height: 18)
-    }
-    
 }
 
 // MARK: - Search
 extension WorkspaceView {
-    private var searchFieldView: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "magnifyingglass")
-                .foregroundStyle(.secondary)
-            ZStack(alignment: .trailing) {
-                TextField("Search", text: $searchQuery)
-                    .textFieldStyle(.plain)
-                    .padding(.trailing, searchProgressFraction == nil ? 0 : 52)
-                if let progress = searchProgressFraction {
-                    searchProgressView(progress: progress)
-                        .padding(.trailing, 2)
-                }
-            }
-        }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 8)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .frame(width: 220)
-        .onChange(of: searchQuery) { _, newValue in
-            vm.searchFilter(newValue)
-        }
-    }
-
     private var searchProgressFraction: Double? {
         guard !vm.filterText.isEmpty,
               let progress = vm.searchPercentageDone
         else { return nil }
         let clamped = min(max(Double(progress), 0), 1)
         return clamped < 1 ? clamped : nil
-    }
-
-    private func searchProgressView(progress: Double) -> some View {
-        HStack(spacing: 4) {
-            Text(progress, format: .percent.precision(.fractionLength(0)))
-                .font(.caption2)
-                .monospacedDigit()
-                .foregroundStyle(.secondary)
-                .fixedSize()
-            
-            ProgressView(value: progress)
-                .progressViewStyle(CircularProgressStyle())
-                .frame(width: 16, height: 16)
-                .opacity(0.9)
-        }
     }
 }
 
@@ -168,4 +138,9 @@ extension WorkspaceView {
             set: { vm.selectedChunks = $0 }
         )
     }
+}
+
+#Preview {
+    WorkspaceView(vm: NMViewModel(), workspace: Workspace(file: URL(string: "Test")!))
+        .frame(width: 800, height: 500)
 }

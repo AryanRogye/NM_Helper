@@ -13,6 +13,8 @@ import nmcore
 @Observable
 @MainActor
 final class NMViewModel {
+
+    private static let vimModeDefaultsKey = "NMViewModel.vimModeEnabled"
      
     /// CTX Required for swiftdata sync
     @ObservationIgnored
@@ -51,6 +53,11 @@ final class NMViewModel {
     var isSidebarVisible = true
     var sidebarTab: SidebarTab = .sidebar
     var allowEdit = false
+    var isInVimMode = false {
+        didSet {
+            UserDefaults.standard.set(isInVimMode, forKey: Self.vimModeDefaultsKey)
+        }
+    }
     
     var searchIndexs: [Int: String] = [:]
     var filterText: String = ""
@@ -62,6 +69,10 @@ final class NMViewModel {
     var scanTask: Task<Void, Never>?
     var scanSymbolTask: Task<Void, Never>?
     var searchTask: Task<Void, Never>?
+
+    init() {
+        self.isInVimMode = UserDefaults.standard.bool(forKey: Self.vimModeDefaultsKey)
+    }
     
     /// Switch Screen
     public func switchScreens(to screen: Screens) {

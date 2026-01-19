@@ -11,7 +11,7 @@ import nmcore
 // MARK: - NM
 extension NMViewModel {
     
-    public func nmSelect(_ url: URL) {
+    public func nmSelect(_ url: URL, flags: [NMFlags]) {
         
         /// Check if is running, if we are return
         if isNMScanning { return }
@@ -34,6 +34,7 @@ extension NMViewModel {
         
         /// load a chunk size
         let chunkSize = self.chunkSize
+        let flags = flags
         
         
         let nmcore = nmcore
@@ -54,7 +55,7 @@ extension NMViewModel {
                 /// if task is called to get cancelled, cancel it
                 try Task.checkCancellation()
                 
-                let result = try await nmcore.scanFile(path: path)
+                let result = try await nmcore.scanFile(path: path, options: flags)
                 
                 /// check again if task got cancelled
                 try Task.checkCancellation()

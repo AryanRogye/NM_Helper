@@ -1,5 +1,42 @@
 import Foundation
 
+public enum NMFlags {
+    case external_symbols
+    case hide_undefined_symbols
+    case sort_by_address
+    case no_sorting
+    case reverse_sort
+    case just_symbol_names
+    case include_debug_symbols
+    case only_undefined_symbols
+    
+    public var flag: String {
+        switch self {
+            
+        case .external_symbols:
+            "-g"
+        case .hide_undefined_symbols:
+            "-U"
+            
+        case .sort_by_address:
+            "-n"
+        case .no_sorting:
+            "-p"
+            
+        case .reverse_sort:
+            "-r"
+            
+        case .just_symbol_names:
+            "-j"
+            
+        case .include_debug_symbols:
+            "-a"
+        case .only_undefined_symbols:
+            "-u"
+        }
+    }
+}
+
 public final class NMCore: Sendable {
     
     public let nmPath: String
@@ -9,12 +46,14 @@ public final class NMCore: Sendable {
         self.nmPath = nmPath
     }
 
-    public func scanFile(path: String) async throws -> String {
+    public func scanFile(path: String, options: [NMFlags] = []) async throws -> String {
         let process = Process()
         let pipe = Pipe()
         
         process.executableURL = URL(fileURLWithPath: nmPath)
-        process.arguments = [path]
+        
+        let arguments : [String] = options.map(\.flag) + [path]
+        process.arguments = arguments
         
         process.standardOutput = pipe
         process.standardError = pipe
@@ -50,8 +89,8 @@ public final class NMCore: Sendable {
         return result
     }
     
-    public func scanFile(url: URL) async throws -> String {
-        try await scanFile(path: url.path)
+    public func scanFile(url: URL, options: [NMFlags] = []) async throws -> String {
+        try await scanFile(path: url.path, options: options)
     }
 
     public func grep(_ query: String, in text: String) -> [Int] {

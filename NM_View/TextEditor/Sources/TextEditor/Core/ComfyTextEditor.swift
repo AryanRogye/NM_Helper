@@ -47,6 +47,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
     var onReady: (EditorCommands) -> Void
     var onSave : () -> Void
     var onHighlightUpdated: (CGFloat) -> Void
+    var onSearchRequested: () -> Void
     
     public final class Coordinator {
         var lastChunkCount: Int = 0
@@ -73,12 +74,14 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         onHighlight: @escaping (HighlightCommands) -> Void = { _ in },
         onSave : @escaping () -> Void = { },
         onHighlightUpdated: @escaping (CGFloat) -> Void = { _ in },
+        onSearchRequested: @escaping () -> Void = { }
     ) {
         self.useChunks = useChunks
         self.highlightIndexRows = highlightIndexRows
         self.filterText = filterText
         self.onReady = onReady
         self.onSave = onSave
+        self.onSearchRequested = onSearchRequested
         self._text = text
         self._chunks = chunks
         self._font = font
@@ -109,7 +112,8 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         editorBackground: Color = .white,
         editorForegroundStyle: Color = .black,
         borderColor: Color = Color.gray.opacity(0.3),
-        borderRadius: CGFloat = 8
+        borderRadius: CGFloat = 8,
+        onSearchRequested: @escaping () -> Void = { }
     ) {
         self.init(
             text: text,
@@ -128,7 +132,8 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
             editorForegroundStyle: editorForegroundStyle,
             borderColor: borderColor,
             onReady: { _ in },
-            onSave: { }
+            onSave: { },
+            onSearchRequested: onSearchRequested
         )
     }
     
@@ -146,7 +151,8 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         borderColor: Color = Color.gray.opacity(0.3),
         borderRadius: CGFloat = 8,
         onHighlightUpdated: @escaping (CGFloat) -> Void = { _ in },
-        onHighlight: @escaping (HighlightCommands) -> Void = { _ in }
+        onHighlight: @escaping (HighlightCommands) -> Void = { _ in },
+        onSearchRequested: @escaping () -> Void = { }
     ) {
         self.init(
             text: .constant(""),
@@ -169,6 +175,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
             onHighlight: onHighlight,
             onSave: { },
             onHighlightUpdated: onHighlightUpdated,
+            onSearchRequested: onSearchRequested
         )
     }
     
@@ -195,8 +202,13 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         viewController.vimBottomView.setBorderColor(color: NSColor(borderColor))
         viewController.textView.isEditable = allowEdit
         
+        viewController.textView.isEditable = true
+        viewController.textView.isSelectable = true
+        viewController.vimEngine.onSearchRequested = onSearchRequested
+
         /// Observe Text Changes
         textViewDelegate.observeCurrentIndex(currentIndex)
+        textViewDelegate.observeAllowEdit($allowEdit)
         textViewDelegate.observeTextChange($text)
         textViewDelegate.observeFontChange($font)
         textViewDelegate.observeBoldUnderCursor($isBold)
@@ -321,6 +333,8 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
 
             }
         }
+        
+        nsViewController.vimEngine.onSearchRequested = onSearchRequested
 
         if nsViewController.scrollView.hasVerticalScroller != showScrollbar {
             nsViewController.scrollView.hasVerticalScroller = showScrollbar
@@ -346,8 +360,11 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
             nsViewController.vimBottomView.setBorderColor(color: NSColor(borderColor))
         }
 
-        if nsViewController.textView.isEditable != allowEdit {
-            nsViewController.textView.isEditable = allowEdit
+        if !nsViewController.textView.isEditable {
+            nsViewController.textView.isEditable = true
+        }
+        if !nsViewController.textView.isSelectable {
+            nsViewController.textView.isSelectable = true
         }
     }
 

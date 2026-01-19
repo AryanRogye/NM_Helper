@@ -30,6 +30,7 @@ class VimEngine: ObservableObject {
     @Published var visualAnchorLocation: Int?
     
     var onSave: (() -> Void)? = nil
+    var onSearchRequested: (() -> Void)? = nil
 
     public func updatePosition() {
         let p = buffer.cursorPosition()
@@ -61,6 +62,14 @@ class VimEngine: ObservableObject {
         var didPressInsertButIsInsertMode: Bool = false
         var didPressCommandButIsCommandMode: Bool = false
         var didJustMoveToEndOfLine: Bool = false
+
+        if state != .insert,
+           state != .command,
+           let chars = event.characters,
+           chars == "/" {
+            onSearchRequested?()
+            return false
+        }
 
         switch shortcut {
             

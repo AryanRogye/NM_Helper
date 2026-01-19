@@ -20,5 +20,32 @@ struct NM_ViewApp: App {
         .windowStyle(.titleBar)
         .windowToolbarStyle(.unifiedCompact)
         .modelContainer(for: [Workspace.self])
+        .commands {
+            SidebarCommands()
+        }
+    }
+}
+
+private struct SidebarCommands: Commands {
+    @FocusedValue(\.sidebarToggleAction) private var sidebarToggleAction
+    @FocusedValue(\.vimModeBinding) private var vimModeBinding
+
+    var body: some Commands {
+        CommandGroup(replacing: .saveItem) {
+            Button("Toggle Sidebar") {
+                sidebarToggleAction?.toggle()
+            }
+            .keyboardShortcut("s", modifiers: [.command])
+            .disabled(sidebarToggleAction == nil)
+        }
+
+        CommandGroup(after: .textEditing) {
+            if let vimModeBinding {
+                Toggle("Vim Mode", isOn: vimModeBinding)
+            } else {
+                Button("Vim Mode") {}
+                    .disabled(true)
+            }
+        }
     }
 }

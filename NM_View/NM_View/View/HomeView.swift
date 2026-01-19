@@ -42,7 +42,6 @@ struct HomeView: View {
                         Image(systemName: vm.isSidebarVisible ? "sidebar.leading" : "sidebar.trailing")
                     }
                     .help(vm.isSidebarVisible ? "Hide Sidebar" : "Show Sidebar")
-                    .keyboardShortcut("s", modifiers: [.command, .option])
                 }
 //                if let size = vm.size {
 //                    ToolbarItem(placement: .automatic) {
@@ -60,5 +59,35 @@ struct HomeView: View {
                 }
             )
         }
+        .focusedSceneValue(\.sidebarToggleAction, SidebarToggleAction {
+            vm.toggleSidebar()
+        })
+        .focusedSceneValue(\.vimModeBinding, $vm.isInVimMode)
+    }
+}
+
+struct SidebarToggleAction {
+    let toggle: () -> Void
+}
+
+struct SidebarToggleActionKey: FocusedValueKey {
+    typealias Value = SidebarToggleAction
+}
+
+extension FocusedValues {
+    var sidebarToggleAction: SidebarToggleAction? {
+        get { self[SidebarToggleActionKey.self] }
+        set { self[SidebarToggleActionKey.self] = newValue }
+    }
+}
+
+struct VimModeBindingKey: FocusedValueKey {
+    typealias Value = Binding<Bool>
+}
+
+extension FocusedValues {
+    var vimModeBinding: Binding<Bool>? {
+        get { self[VimModeBindingKey.self] }
+        set { self[VimModeBindingKey.self] = newValue }
     }
 }
