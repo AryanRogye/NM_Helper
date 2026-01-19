@@ -48,6 +48,8 @@ private struct SidebarTabContent: View {
                 SidebarWorkspaceTabView(vm: vm)
             case .panel:
                 SidebarSearchPanelView(vm: vm)
+            case .symbol_types:
+                SidebarSymbolView(vm: vm)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -42,13 +42,9 @@ struct SidebarLayout<Sidebar: View, Content: View>: View {
                     .frame(width: sidebarWidthForVisibility)
                     .opacity(isSidebarVisible ? 1 : 0)
                     .allowsHitTesting(isSidebarVisible)
-                
-                Divider()
-                    .opacity(isSidebarVisible ? 1 : 0)
-                    .frame(width: isSidebarVisible ? nil : 0)
-                
-                DragHandle()
-                    .frame(width: isSidebarVisible ? 6 : 0)
+
+                ResizableDivider()
+                    .frame(width: isSidebarVisible ? 10 : 0)
                     .opacity(isSidebarVisible ? 1 : 0)
                     .allowsHitTesting(isSidebarVisible)
                     .gesture(resizeGesture)
@@ -84,18 +80,71 @@ struct SidebarLayout<Sidebar: View, Content: View>: View {
     }
 }
 
-private struct DragHandle: View {
-    var body: some View {
-        Rectangle()
-            .fill(Color.clear)
-            .contentShape(Rectangle())
-            .frame(width: 6)
-            .onHover { inside in
-                if inside {
-                    NSCursor.resizeLeftRight.push()
-                } else {
-                    NSCursor.pop()
-                }
-            }
+private struct ResizableDivider: NSViewRepresentable {
+    func makeNSView(context: Context) -> DividerHandleView {
+        DividerHandleView()
+    }
+
+    func updateNSView(_ nsView: DividerHandleView, context: Context) {}
+}
+
+private final class DividerHandleView: NSView {
+    private var trackingAreaRef: NSTrackingArea?
+    private var isHovering = false {
+        didSet { needsDisplay = true }
+    }
+
+    override var mouseDownCanMoveWindow: Bool { false }
+
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        wantsLayer = true
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let trackingAreaRef {
+            removeTrackingArea(trackingAreaRef)
+        }
+        let tracking = NSTrackingArea(
+            rect: bounds,
+            options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+            owner: self,
+            userInfo: nil
+        )
+        addTrackingArea(tracking)
+        trackingAreaRef = tracking
+    }
+
+    override func setFrameSize(_ newSize: NSSize) {
+        super.setFrameSize(newSize)
+        needsDisplay = true
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        isHovering = true
+        NSCursor.resizeLeftRight.push()
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        isHovering = false
+        NSCursor.pop()
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        let bg = isHovering
+            ? NSColor.labelColor.withAlphaComponent(0.08)
+            : NSColor.clear
+        bg.setFill()
+        dirtyRect.fill()
+
+        let lineX = bounds.midX - 0.5
+        let lineRect = NSRect(x: lineX, y: 0, width: 1, height: bounds.height)
+        NSColor.separatorColor.setFill()
+        lineRect.fill()
     }
 }

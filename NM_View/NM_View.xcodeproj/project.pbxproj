@@ -8,12 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		2A49DB9604F598F1E2BE68E6 /* SidebarTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324FA9277D036FC15B100094 /* SidebarTab.swift */; };
+		91D622EFC7C6427986F5F2DE /* nmcore in Frameworks */ = {isa = PBXBuildFile; productRef = 9261D578B7814737A019625F /* nmcore */; };
+		9B097FC72F1DF0C10031B1B1 /* nmcore in Frameworks */ = {isa = PBXBuildFile; productRef = 9B097FC62F1DF0C10031B1B1 /* nmcore */; };
 		9B6287702F1C966E00180E93 /* SidebarLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6287642F1C966E00180E93 /* SidebarLayout.swift */; };
-		9B6287722F1C966E00180E93 /* Sidebar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6287672F1C966E00180E93 /* Sidebar.swift */; };
 		9B6287732F1C966E00180E93 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B62876A2F1C966E00180E93 /* HomeView.swift */; };
 		9B6287752F1C966E00180E93 /* NMViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B62876E2F1C966E00180E93 /* NMViewModel.swift */; };
 		9B6287762F1C966E00180E93 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9B6287692F1C966E00180E93 /* Assets.xcassets */; };
-		9B6287772F1C966E00180E93 /* NM_View-Bridging-Header.h in Resources */ = {isa = PBXBuildFile; fileRef = 9B62876C2F1C966E00180E93 /* NM_View-Bridging-Header.h */; };
 		9B62877B2F1C96DC00180E93 /* NM_ViewApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6287792F1C96DC00180E93 /* NM_ViewApp.swift */; };
 		9B6287C32F1CA14A00180E93 /* WindowAccessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6287C22F1CA14A00180E93 /* WindowAccessor.swift */; };
 		9B6287C92F1CA20800180E93 /* TextEditor in Frameworks */ = {isa = PBXBuildFile; productRef = 9B6287C82F1CA20800180E93 /* TextEditor */; };
@@ -22,10 +22,11 @@
 		9B62885C2F1CC2DE00180E93 /* Screens.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B62885B2F1CC2DB00180E93 /* Screens.swift */; };
 		9B62885E2F1CC36300180E93 /* WorkspaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B62885D2F1CC36000180E93 /* WorkspaceView.swift */; };
 		9B6288B72F1D4B9A00180E93 /* CircularProgressStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6288B62F1D4B9900180E93 /* CircularProgressStyle.swift */; };
-		9B6288E02F1D78DB00180E93 /* GoHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6288DF2F1D78D900180E93 /* GoHelpers.swift */; };
 		9B6289E52F1DBCD900180E93 /* SidebarTabContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6289E42F1DBCD900180E93 /* SidebarTabContainer.swift */; };
 		9B6289EA2F1DBCF500180E93 /* SidebarSearchPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6289E72F1DBCF500180E93 /* SidebarSearchPanelView.swift */; };
 		9B6289EB2F1DBCF500180E93 /* SidebarWorkspaceTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6289E82F1DBCF500180E93 /* SidebarWorkspaceTabView.swift */; };
+		9B6289FC2F1DCE6E00180E93 /* SidebarSymbolView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6289FB2F1DCE6D00180E93 /* SidebarSymbolView.swift */; };
+		9B628A012F1DCFA100180E93 /* Symbols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B628A002F1DCF9F00180E93 /* Symbols.swift */; };
 		B5B6B489A0D34339929635D1 /* NMTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CEA54099D440598BE1BDB8 /* NMTextView.swift */; };
 /* End PBXBuildFile section */
 
@@ -33,11 +34,9 @@
 		324FA9277D036FC15B100094 /* SidebarTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarTab.swift; sourceTree = "<group>"; };
 		83CEA54099D440598BE1BDB8 /* NMTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NMTextView.swift; sourceTree = "<group>"; };
 		9B6287642F1C966E00180E93 /* SidebarLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarLayout.swift; sourceTree = "<group>"; };
-		9B6287672F1C966E00180E93 /* Sidebar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sidebar.swift; sourceTree = "<group>"; };
 		9B6287692F1C966E00180E93 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9B62876A2F1C966E00180E93 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		9B62876B2F1C966E00180E93 /* NM_View.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NM_View.entitlements; sourceTree = "<group>"; };
-		9B62876C2F1C966E00180E93 /* NM_View-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NM_View-Bridging-Header.h"; sourceTree = "<group>"; };
 		9B62876E2F1C966E00180E93 /* NMViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NMViewModel.swift; sourceTree = "<group>"; };
 		9B6287792F1C96DC00180E93 /* NM_ViewApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NM_ViewApp.swift; sourceTree = "<group>"; };
 		9B6287C22F1CA14A00180E93 /* WindowAccessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowAccessor.swift; sourceTree = "<group>"; };
@@ -46,27 +45,22 @@
 		9B62885B2F1CC2DB00180E93 /* Screens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Screens.swift; sourceTree = "<group>"; };
 		9B62885D2F1CC36000180E93 /* WorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceView.swift; sourceTree = "<group>"; };
 		9B6288B62F1D4B9900180E93 /* CircularProgressStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularProgressStyle.swift; sourceTree = "<group>"; };
-		9B6288DF2F1D78D900180E93 /* GoHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoHelpers.swift; sourceTree = "<group>"; };
 		9B6289E42F1DBCD900180E93 /* SidebarTabContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarTabContainer.swift; sourceTree = "<group>"; };
 		9B6289E72F1DBCF500180E93 /* SidebarSearchPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarSearchPanelView.swift; sourceTree = "<group>"; };
 		9B6289E82F1DBCF500180E93 /* SidebarWorkspaceTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarWorkspaceTabView.swift; sourceTree = "<group>"; };
+		9B6289FB2F1DCE6D00180E93 /* SidebarSymbolView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarSymbolView.swift; sourceTree = "<group>"; };
+		9B628A002F1DCF9F00180E93 /* Symbols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Symbols.swift; sourceTree = "<group>"; };
 		9BAF4D282F1C5F41006536D2 /* NM_View.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NM_View.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		9BAF4D372F1C6705006536D2 /* CoreNative */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = CoreNative;
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		9BAF4D252F1C5F41006536D2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				91D622EFC7C6427986F5F2DE /* nmcore in Frameworks */,
 				9B6287C92F1CA20800180E93 /* TextEditor in Frameworks */,
+				9B097FC72F1DF0C10031B1B1 /* nmcore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,12 +82,11 @@
 		9B6287682F1C966E00180E93 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				9B6289E92F1DBCF500180E93 /* Sidebar */,
 				9B62877C2F1C96E300180E93 /* ViewModel */,
+				9B6289E92F1DBCF500180E93 /* Sidebar */,
 				9B6287652F1C966E00180E93 /* Components */,
 				9B62885D2F1CC36000180E93 /* WorkspaceView.swift */,
 				9B62883B2F1CBEC000180E93 /* AddView.swift */,
-				9B6287672F1C966E00180E93 /* Sidebar.swift */,
 				9B62876A2F1C966E00180E93 /* HomeView.swift */,
 			);
 			path = View;
@@ -102,8 +95,6 @@
 		9B62876F2F1C966E00180E93 /* NM_View */ = {
 			isa = PBXGroup;
 			children = (
-				9B6288DE2F1D78D800180E93 /* Helpers */,
-				9B62876C2F1C966E00180E93 /* NM_View-Bridging-Header.h */,
 				9B62877A2F1C96DC00180E93 /* App */,
 				9B6287D62F1CAC6C00180E93 /* Models */,
 				9B6287682F1C966E00180E93 /* View */,
@@ -132,6 +123,7 @@
 		9B6287D62F1CAC6C00180E93 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				9B628A002F1DCF9F00180E93 /* Symbols.swift */,
 				9B62885B2F1CC2DB00180E93 /* Screens.swift */,
 				324FA9277D036FC15B100094 /* SidebarTab.swift */,
 				9B6287D72F1CAC7300180E93 /* Workspace.swift */,
@@ -139,17 +131,10 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		9B6288DE2F1D78D800180E93 /* Helpers */ = {
-			isa = PBXGroup;
-			children = (
-				9B6288DF2F1D78D900180E93 /* GoHelpers.swift */,
-			);
-			path = Helpers;
-			sourceTree = "<group>";
-		};
 		9B6289E92F1DBCF500180E93 /* Sidebar */ = {
 			isa = PBXGroup;
 			children = (
+				9B6289FB2F1DCE6D00180E93 /* SidebarSymbolView.swift */,
 				9B6289E72F1DBCF500180E93 /* SidebarSearchPanelView.swift */,
 				9B6289E82F1DBCF500180E93 /* SidebarWorkspaceTabView.swift */,
 			);
@@ -159,7 +144,6 @@
 		9BAF4D1F2F1C5F41006536D2 = {
 			isa = PBXGroup;
 			children = (
-				9BAF4D372F1C6705006536D2 /* CoreNative */,
 				9B62876F2F1C966E00180E93 /* NM_View */,
 				9BAF4D292F1C5F41006536D2 /* Products */,
 			);
@@ -180,7 +164,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9BAF4D332F1C5F42006536D2 /* Build configuration list for PBXNativeTarget "NM_View" */;
 			buildPhases = (
-				9BAF4D362F1C62E6006536D2 /* ShellScript */,
 				9BAF4D242F1C5F41006536D2 /* Sources */,
 				9BAF4D252F1C5F41006536D2 /* Frameworks */,
 				9BAF4D262F1C5F41006536D2 /* Resources */,
@@ -189,12 +172,11 @@
 			);
 			dependencies = (
 			);
-			fileSystemSynchronizedGroups = (
-				9BAF4D372F1C6705006536D2 /* CoreNative */,
-			);
 			name = NM_View;
 			packageProductDependencies = (
+				9261D578B7814737A019625F /* nmcore */,
 				9B6287C82F1CA20800180E93 /* TextEditor */,
+				9B097FC62F1DF0C10031B1B1 /* nmcore */,
 			);
 			productName = NM_View;
 			productReference = 9BAF4D282F1C5F41006536D2 /* NM_View.app */;
@@ -226,6 +208,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				9B6287C72F1CA20800180E93 /* XCLocalSwiftPackageReference "TextEditor" */,
+				9B097FC52F1DF0C10031B1B1 /* XCLocalSwiftPackageReference "../nmcore" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 9BAF4D292F1C5F41006536D2 /* Products */;
@@ -243,32 +226,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B6287762F1C966E00180E93 /* Assets.xcassets in Resources */,
-				9B6287772F1C966E00180E93 /* NM_View-Bridging-Header.h in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		9BAF4D362F1C62E6006536D2 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "set -euo pipefail\n\nexport PATH=\"/opt/homebrew/bin:/usr/local/go/bin:$HOME/go/bin:/usr/local/bin:$PATH\"\n\nsrc=\"${SRCROOT}\"\nout=\"${src}/CoreNative\"\nproject_root=\"${SRCROOT}/..\"\nscript=\"${project_root}/scripts/build-universal.sh\"\nbuild=\"${TARGET_BUILD_DIR}/go-universal\"\nstatic_lib=\"${build}/libnm_core.a\"\nheader=\"${build}/libnm_core.h\"\n\nrm -f \"$out/libnm_core.a\"\nrm -f \"$out/libnm_core.h\"\n\nbash \"$script\"\n\nmkdir -p \"$out\"\n\nditto \"$static_lib\" \"$out/\"\nditto \"$header\" \"$out/\"\n\necho \"RUN SCRIPT: $(date)\"\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		9BAF4D242F1C5F41006536D2 /* Sources */ = {
@@ -276,7 +237,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				9B62885E2F1CC36300180E93 /* WorkspaceView.swift in Sources */,
-				9B6288E02F1D78DB00180E93 /* GoHelpers.swift in Sources */,
 				B5B6B489A0D34339929635D1 /* NMTextView.swift in Sources */,
 				9B6287702F1C966E00180E93 /* SidebarLayout.swift in Sources */,
 				9B62883C2F1CBEC100180E93 /* AddView.swift in Sources */,
@@ -286,12 +246,13 @@
 				9B6288B72F1D4B9A00180E93 /* CircularProgressStyle.swift in Sources */,
 				9B6289E52F1DBCD900180E93 /* SidebarTabContainer.swift in Sources */,
 				9B62877B2F1C96DC00180E93 /* NM_ViewApp.swift in Sources */,
-				9B6287722F1C966E00180E93 /* Sidebar.swift in Sources */,
 				9B6287D82F1CAC7A00180E93 /* Workspace.swift in Sources */,
 				9B6287732F1C966E00180E93 /* HomeView.swift in Sources */,
 				9B6287752F1C966E00180E93 /* NMViewModel.swift in Sources */,
 				2A49DB9604F598F1E2BE68E6 /* SidebarTab.swift in Sources */,
 				9B62885C2F1CC2DE00180E93 /* Screens.swift in Sources */,
+				9B6289FC2F1DCE6E00180E93 /* SidebarSymbolView.swift in Sources */,
+				9B628A012F1DCFA100180E93 /* Symbols.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -440,15 +401,10 @@
 				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				"HEADER_SEARCH_PATHS[arch=*]" = "$(SRCROOT)/CoreNative";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
-				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/CoreNative",
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.aryanrogye.NM-View";
@@ -464,7 +420,6 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				"SWIFT_OBJC_BRIDGING_HEADER[arch=*]" = "$(SRCROOT)/NM_View/NM_View-Bridging-Header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -492,15 +447,10 @@
 				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				"HEADER_SEARCH_PATHS[arch=*]" = "$(SRCROOT)/CoreNative";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
-				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/CoreNative",
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.aryanrogye.NM-View";
@@ -516,7 +466,6 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				"SWIFT_OBJC_BRIDGING_HEADER[arch=*]" = "${SRCROOT}/NM_View/NM_View-Bridging-Header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -546,6 +495,10 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
+		9B097FC52F1DF0C10031B1B1 /* XCLocalSwiftPackageReference "../nmcore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../nmcore;
+		};
 		9B6287C72F1CA20800180E93 /* XCLocalSwiftPackageReference "TextEditor" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = TextEditor;
@@ -553,6 +506,14 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		9261D578B7814737A019625F /* nmcore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = nmcore;
+		};
+		9B097FC62F1DF0C10031B1B1 /* nmcore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = nmcore;
+		};
 		9B6287C82F1CA20800180E93 /* TextEditor */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = TextEditor;

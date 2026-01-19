@@ -10,6 +10,7 @@ import Foundation
 enum SidebarTab: String, CaseIterable, Identifiable {
     case sidebar
     case panel
+    case symbol_types
 
     var id: String { rawValue }
 
@@ -19,6 +20,8 @@ enum SidebarTab: String, CaseIterable, Identifiable {
             return "Sidebar"
         case .panel:
             return "Panel"
+        case .symbol_types:
+            return "Symbols"
         }
     }
 }

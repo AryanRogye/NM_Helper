@@ -19,7 +19,7 @@ struct HomeView: View {
     }
     
     var body: some View {
-        SidebarLayout(isSidebarVisible: vm.isSidebarVisible, minSidebarWidth: 240) {
+        SidebarLayout(isSidebarVisible: vm.isSidebarVisible, minSidebarWidth: 400) {
             SidebarTabContainer(vm: vm)
         } content: {
             VStack {

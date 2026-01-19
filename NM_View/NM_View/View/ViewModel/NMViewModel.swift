@@ -8,6 +8,7 @@
 import Foundation
 import SwiftData
 import TextEditor
+import nmcore
 
 @Observable
 @MainActor
@@ -32,11 +33,15 @@ final class NMViewModel {
     var selectedWorkspace: Workspace?
     var selectedChunks: [String] = []
     
+    var selectedWorkspaceSymbols: [Symbols] = []
+    
     var selectedSize: Int? = nil
     var selectedMaxSize: Int? = nil
 
     var isNMScanning = false
     var isLoadingChunks = false
+    
+    var isScanningSymbols = false
     
     var isSidebarVisible = true
     var sidebarTab: SidebarTab = .sidebar
@@ -49,6 +54,7 @@ final class NMViewModel {
     var highlightCommands: HighlightCommands?
     
     var scanTask: Task<Void, Never>?
+    var scanSymbolTask: Task<Void, Never>?
     var searchTask: Task<Void, Never>?
     
     /// Switch Screen
@@ -67,6 +73,7 @@ final class NMViewModel {
     private func clearWorkspace() {
         self.scanTask?.cancel()
         self.searchTask?.cancel()
+        self.scanSymbolTask?.cancel()
         self.selectedWorkspace = nil
         self.selectedChunks.removeAll()
         self.selectedSize = nil
@@ -76,6 +83,8 @@ final class NMViewModel {
         self.searchIndexs.removeAll()
         self.filterText = ""
         self.searchPercentageDone = nil
+        self.selectedWorkspaceSymbols.removeAll()
+        self.isScanningSymbols = false
     }
 }
 
@@ -122,26 +131,7 @@ extension NMViewModel {
             
             if Task.isCancelled { return }
             
-            var indices : [Int] = []
-            /// Convert to C String
-            filter.withCString { cStr in
-                chunks.withCString { searchCStr in
-                    
-                    var outSize: Int32 = 0
-
-                    if let ptr = nm_grep(
-                        UnsafeMutablePointer<CChar>(mutating: searchCStr),
-                        UnsafeMutablePointer<CChar>(mutating: cStr),
-                        &outSize
-                    ) {
-                        
-                        for i in 0..<Int(outSize) {
-                            indices.append(Int(ptr[i]))
-                        }
-                        free(ptr)
-                    }
-                }
-            }
+            let indices = NMCore.grep(filter, in: chunks)
             
             if Task.isCancelled { return }
             guard let self else { return }
@@ -189,18 +179,28 @@ extension NMViewModel {
     
     public func nmSelect(_ url: URL) {
         
+        /// Check if is running, if we are return
         if isNMScanning { return }
         if isLoadingChunks { return }
         
+        /// cancel tasks that may be active
         scanTask?.cancel()
         
+        /// store path once
         let path = url.path
+        
+        /// set flags to true locking this function
         isNMScanning = true
         isLoadingChunks = true
+        
+        /// clear
         selectedChunks.removeAll()
         selectedMaxSize = nil
+        selectedWorkspaceSymbols.removeAll(keepingCapacity: true)
         
+        /// load a chunk size
         let chunkSize = self.chunkSize
+        
         
         scanTask = Task.detached(priority: .userInitiated) { [path] in
             
@@ -209,19 +209,16 @@ extension NMViewModel {
                 Task { @MainActor in
                     self.isNMScanning = false
                     self.isLoadingChunks = false
+                    self.isScanningSymbols = false
                 }
             }
             
-            /// Cancel task
+            /// if task is called to get cancelled, cancel it
             if Task.isCancelled { return }
             
-            let result: String = path.withCString { cStr in
-                let mut = UnsafeMutablePointer<CChar>(mutating: cStr)
-                guard let out = nm_scan_file(mut) else { return "" }
-                defer { nm_free(out) }
-                return String(cString: out)
-            }
+            let result: String = NMCore.scanFile(path: path)
             
+            /// check again if task got cancelled
             if Task.isCancelled { return }
 
             await MainActor.run { [result] in
@@ -243,6 +240,7 @@ extension NMViewModel {
                 
                 var batch: [String] = []
                 var batchSize = 0
+                /// 10 at a time
                 let batchCount = 10
                 
                 for _ in 0..<batchCount {
@@ -270,8 +268,48 @@ extension NMViewModel {
                 try? await Task.sleep(nanoseconds: 10_000_000) // 30ms, tweak
             }
             
+            
+            /// now we can start the symbol scan
             await MainActor.run {
                 self.isLoadingChunks = false
+                self.isScanningSymbols = true
+            }
+            
+            let symbols = SymbolType.allCases.map(\.rawValue)   // [String]
+            let count = symbols.count
+            
+            var foundSymbols: [Symbols] = []
+            
+            let resultsBySymbol = NMCore.multiGrep(symbols, in: full)
+            for i in 0..<count {
+                let type = SymbolType.allCases[i]
+                let key = symbols[i]
+                let indices = resultsBySymbol[key] ?? []
+                for idx in indices {
+                    foundSymbols.append(Symbols(symbolType: type, index: idx))
+                }
+            }
+            
+            /// now we can slowly update the ui
+            let batchSize = 100
+            var start = 0
+            let end = foundSymbols.count
+            
+            while start < end {
+                if Task.isCancelled { return }
+                
+                let next = min(start + batchSize, end)
+                let batch = Array(foundSymbols[start..<next])
+                start = next
+                
+                await MainActor.run {
+                    self.selectedWorkspaceSymbols.append(contentsOf: batch)
+                    // or set a progress % here if you want
+                }
+                
+                // slow it down + let UI breathe
+                try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
+                // or: await Task.yield()
             }
         }
     }

@@ -4,17 +4,10 @@
 - `NM_View/` is the macOS app (Xcode project `NM_View.xcodeproj`).
   - `NM_View/App/` app entry, `NM_View/View/` UI, `NM_View/View/ViewModel/` view models.
   - `NM_View/Assets.xcassets/` app assets.
-  - `NM_View/CoreNative/` receives the generated Go static lib + header for linking.
-- `NM_Core/` is the Go core (c-archive exports).
-- `scripts/` contains build helpers (notably `build-universal.sh`).
+- `nmcore/` is the Swift package that runs `/usr/bin/nm` and provides search helpers.
 - `NM_View/TextEditor/` and `NM_View/LocalShortcuts/` are Swift packages used by the app.
 
 ## Build, Test, and Development Commands
-- Build Go core (local, single arch):
-  - `cd NM_Core && go build -buildmode=c-archive -o libnm_core.a .`
-- Build Go core (universal, arm64 + amd64):
-  - `./scripts/build-universal.sh`
-  - Outputs to `build/go-universal/` (or `$(TARGET_BUILD_DIR)/go-universal` when run by Xcode).
 - Run the app:
   - Open `NM_View/NM_View.xcodeproj` in Xcode and Run.
 - Swift package tests (editor package):
@@ -22,7 +15,6 @@
 
 ## Coding Style & Naming Conventions
 - Swift: follow standard Xcode formatting (4 spaces, type names in `UpperCamelCase`, methods/vars in `lowerCamelCase`).
-- Go: use `gofmt`; keep cgo exports with `//export name` directly above the function, and use C types (`*C.char`, `C.int`).
 - Files are grouped by feature (e.g., `View/Components`, `ViewModel`).
 - Prefer clean, readable code.
 - ViewModels: structure with `// MARK:` sections and extensions that tell a clear story.
@@ -43,5 +35,4 @@
   - UI screenshots for visual changes
 
 ## Security & Configuration Notes
-- The Go core shells out to `/usr/bin/nm`; this requires **App Sandbox disabled** or user-granted file access.
-- When exporting new C functions from Go, rebuild the core so `libnm_core.h` updates.
+- The `nmcore` package shells out to `/usr/bin/nm`; this requires **App Sandbox disabled** or user-granted file access.
