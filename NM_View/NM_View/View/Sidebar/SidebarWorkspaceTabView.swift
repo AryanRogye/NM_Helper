@@ -30,6 +30,12 @@ struct SidebarWorkspaceTabView: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             
+            Toggle("Allow Edit", isOn: $vm.allowEdit)
+                .toggleStyle(.switch)
+                .font(.caption)
+                .padding(.horizontal, 12)
+                .padding(.bottom, 8)
+            
             Divider()
             
             ScrollView {

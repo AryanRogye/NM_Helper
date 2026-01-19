@@ -6,6 +6,8 @@
   - `NM_View/Assets.xcassets/` app assets.
 - `nmcore/` is the Swift package that runs `/usr/bin/nm` and provides search helpers.
 - `NM_View/TextEditor/` and `NM_View/LocalShortcuts/` are Swift packages used by the app.
+  - `ComfyTextEditor` exposes bindings like `currentIndex` (line start) and `allowEdit` (read-only toggle).
+  - `TextViewDelegate` updates `currentIndex` to the line start (not the exact cursor position).
 
 ## Build, Test, and Development Commands
 - Run the app:
@@ -36,3 +38,7 @@
 
 ## Security & Configuration Notes
 - The `nmcore` package shells out to `/usr/bin/nm`; this requires **App Sandbox disabled** or user-granted file access.
+
+## App Behavior Notes
+- Symbols are indexed by line start (not raw character match index) when scanning nm output.
+- The Symbols sidebar shows the current line index + symbol type using `currentIndex` and `selectedWorkspaceSymbols`.

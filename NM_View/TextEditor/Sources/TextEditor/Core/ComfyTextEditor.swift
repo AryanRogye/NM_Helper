@@ -25,6 +25,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
     @Binding var isBold       : Bool
     
     var currentIndex: Binding<Int?>
+    @Binding var allowEdit: Bool
     
     /// Boolean if is in VimMode or not
     @Binding var isInVimMode: Bool
@@ -57,6 +58,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         useChunks: Bool,
         highlightIndexRows: Binding<[Int: String]>? = nil,
         currentIndex: Binding<Int?> = .constant(nil),
+        allowEdit: Binding<Bool> = .constant(false),
         filterText: Binding<String>? = nil,
         font: Binding<CGFloat> = .constant(0),
         isBold: Binding<Bool>,
@@ -91,6 +93,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         self.onHighlightUpdated = onHighlightUpdated
         self.onHighlight = onHighlight
         self.currentIndex = currentIndex
+        self._allowEdit = allowEdit
     }
     
     @State private var updateHighlightTask : Task<Void, Never>? = nil
@@ -101,6 +104,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
     public init(
         text: Binding<String>,
         showScrollbar: Binding<Bool>,
+        allowEdit: Binding<Bool> = .constant(false),
         isInVimMode: Binding<Bool> = .constant(false),
         editorBackground: Color = .white,
         editorForegroundStyle: Color = .black,
@@ -112,6 +116,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
             chunks: .constant([]),
             useChunks: false,
             highlightIndexRows: nil,
+            allowEdit: allowEdit,
             filterText: nil,
             font: .constant(0),
             isBold: .constant(false),
@@ -133,6 +138,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         highlightIndexRows: Binding<[Int: String]>? = nil,
         filterText: Binding<String>? = nil,
         currentIndex: Binding<Int?> = .constant(nil),
+        allowEdit: Binding<Bool> = .constant(false),
         showScrollbar: Binding<Bool>,
         isInVimMode: Binding<Bool> = .constant(false),
         editorBackground: Color = .white,
@@ -148,6 +154,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
             useChunks: true,
             highlightIndexRows: highlightIndexRows,
             currentIndex: currentIndex,
+            allowEdit: allowEdit,
             filterText: filterText,
             font: .constant(0),
             isBold: .constant(false),
@@ -186,6 +193,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         viewController.vimBottomView.setBackground(color: NSColor(editorBackground))
         viewController.textView.textColor = NSColor(editorForegroundStyle)
         viewController.vimBottomView.setBorderColor(color: NSColor(borderColor))
+        viewController.textView.isEditable = allowEdit
         
         /// Observe Text Changes
         textViewDelegate.observeCurrentIndex(currentIndex)
@@ -336,6 +344,10 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
 
         if nsViewController.vimBottomView.layer?.borderColor != NSColor(borderColor).cgColor {
             nsViewController.vimBottomView.setBorderColor(color: NSColor(borderColor))
+        }
+
+        if nsViewController.textView.isEditable != allowEdit {
+            nsViewController.textView.isEditable = allowEdit
         }
     }
 

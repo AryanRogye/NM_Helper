@@ -27,6 +27,7 @@
 		9B6289EB2F1DBCF500180E93 /* SidebarWorkspaceTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6289E82F1DBCF500180E93 /* SidebarWorkspaceTabView.swift */; };
 		9B6289FC2F1DCE6E00180E93 /* SidebarSymbolView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6289FB2F1DCE6D00180E93 /* SidebarSymbolView.swift */; };
 		9B628A012F1DCFA100180E93 /* Symbols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B628A002F1DCF9F00180E93 /* Symbols.swift */; };
+		9B68ECED2F1EBD2A009567DF /* NMViewModel+NM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B68ECEC2F1EBD27009567DF /* NMViewModel+NM.swift */; };
 		B5B6B489A0D34339929635D1 /* NMTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CEA54099D440598BE1BDB8 /* NMTextView.swift */; };
 /* End PBXBuildFile section */
 
@@ -50,6 +51,7 @@
 		9B6289E82F1DBCF500180E93 /* SidebarWorkspaceTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarWorkspaceTabView.swift; sourceTree = "<group>"; };
 		9B6289FB2F1DCE6D00180E93 /* SidebarSymbolView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarSymbolView.swift; sourceTree = "<group>"; };
 		9B628A002F1DCF9F00180E93 /* Symbols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Symbols.swift; sourceTree = "<group>"; };
+		9B68ECEC2F1EBD27009567DF /* NMViewModel+NM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NMViewModel+NM.swift"; sourceTree = "<group>"; };
 		9BAF4D282F1C5F41006536D2 /* NM_View.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NM_View.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -115,6 +117,7 @@
 		9B62877C2F1C96E300180E93 /* ViewModel */ = {
 			isa = PBXGroup;
 			children = (
+				9B68ECEC2F1EBD27009567DF /* NMViewModel+NM.swift */,
 				9B62876E2F1C966E00180E93 /* NMViewModel.swift */,
 			);
 			path = ViewModel;
@@ -248,6 +251,7 @@
 				9B62877B2F1C96DC00180E93 /* NM_ViewApp.swift in Sources */,
 				9B6287D82F1CAC7A00180E93 /* Workspace.swift in Sources */,
 				9B6287732F1C966E00180E93 /* HomeView.swift in Sources */,
+				9B68ECED2F1EBD2A009567DF /* NMViewModel+NM.swift in Sources */,
 				9B6287752F1C966E00180E93 /* NMViewModel.swift in Sources */,
 				2A49DB9604F598F1E2BE68E6 /* SidebarTab.swift in Sources */,
 				9B62885C2F1CC2DE00180E93 /* Screens.swift in Sources */,

@@ -68,6 +68,7 @@ extension WorkspaceView {
             highlightIndexRows: $vm.searchIndexs,
             filterText: $vm.filterText,
             currentIndex: $vm.currentIndex,
+            allowEdit: $vm.allowEdit,
             showScrollbar: .constant(false),
             onHighlightUpdated: { highlight in
                 vm.searchPercentageDone = highlight
