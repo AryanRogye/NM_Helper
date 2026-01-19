@@ -1,9 +1,13 @@
 import Foundation
 
-public enum NMCore {
-    public static var nmPath: String = "/usr/bin/nm"
+public final class NMCore: Sendable {
+    public let nmPath: String
 
-    public static func scanFile(path: String) -> String {
+    public init(nmPath: String = "/usr/bin/nm") {
+        self.nmPath = nmPath
+    }
+
+    public func scanFile(path: String) -> String {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: nmPath)
         process.arguments = [path]
@@ -29,31 +33,16 @@ public enum NMCore {
         return output
     }
 
-    public static func scanFile(url: URL) -> String {
+    public func scanFile(url: URL) -> String {
         scanFile(path: url.path)
     }
 
-    public static func grep(_ query: String, in text: String) -> [Int] {
+    public func grep(_ query: String, in text: String) -> [Int] {
         guard !query.isEmpty, !text.isEmpty else { return [] }
-
-        let nsText = text as NSString
-        var results: [Int] = []
-        var searchRange = NSRange(location: 0, length: nsText.length)
-
-        while searchRange.length > 0 {
-            let found = nsText.range(of: query, options: .literal, range: searchRange)
-            if found.location == NSNotFound { break }
-            results.append(found.location)
-
-            let nextLocation = found.location + 1
-            if nextLocation >= nsText.length { break }
-            searchRange = NSRange(location: nextLocation, length: nsText.length - nextLocation)
-        }
-
-        return results
+        return BoyerMoore.search(pattern: query, text: text)
     }
 
-    public static func multiGrep(_ queries: [String], in text: String) -> [String: [Int]] {
+    public func multiGrep(_ queries: [String], in text: String) -> [String: [Int]] {
         guard !queries.isEmpty, !text.isEmpty else { return [:] }
 
         var results: [String: [Int]] = [:]

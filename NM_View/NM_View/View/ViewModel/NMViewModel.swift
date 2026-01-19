@@ -17,6 +17,9 @@ final class NMViewModel {
     /// CTX Required for swiftdata sync
     @ObservationIgnored
     var ctx: ModelContext?
+
+    @ObservationIgnored
+    private let nmcore = NMCore()
     
     public func bind(to ctx: ModelContext) {
         self.ctx = ctx
@@ -126,12 +129,13 @@ extension NMViewModel {
         filterText = filter
         let chunks = selectedChunks.joined()
         
+        let nmcore = nmcore
         searchTask = Task.detached(priority: .userInitiated) { [weak self] in
             
             
             if Task.isCancelled { return }
             
-            let indices = NMCore.grep(filter, in: chunks)
+            let indices = nmcore.grep(filter, in: chunks)
             
             if Task.isCancelled { return }
             guard let self else { return }
@@ -202,6 +206,7 @@ extension NMViewModel {
         let chunkSize = self.chunkSize
         
         
+        let nmcore = nmcore
         scanTask = Task.detached(priority: .userInitiated) { [path] in
             
             /// Set whats gonna happen on exit
@@ -216,7 +221,7 @@ extension NMViewModel {
             /// if task is called to get cancelled, cancel it
             if Task.isCancelled { return }
             
-            let result: String = NMCore.scanFile(path: path)
+            let result: String = nmcore.scanFile(path: path)
             
             /// check again if task got cancelled
             if Task.isCancelled { return }
@@ -280,7 +285,7 @@ extension NMViewModel {
             
             var foundSymbols: [Symbols] = []
             
-            let resultsBySymbol = NMCore.multiGrep(symbols, in: full)
+            let resultsBySymbol = nmcore.multiGrep(symbols, in: full)
             for i in 0..<count {
                 let type = SymbolType.allCases[i]
                 let key = symbols[i]

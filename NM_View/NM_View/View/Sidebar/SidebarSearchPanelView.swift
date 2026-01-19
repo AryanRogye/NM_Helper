@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SidebarSearchPanelView: View {
     @Bindable var vm: NMViewModel
+    @State private var revealedIndex: Int? = nil
 
     var body: some View {
         VStack(spacing: 0) {
@@ -54,30 +55,14 @@ struct SidebarSearchPanelView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 6) {
                 ForEach(sortedSearchRows, id: \.key) { value in
-                    Button(action: {
-                        vm.goToHighlight(value.key)
-                    }) {
-                        HStack(spacing: 10) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("#\(value.key)")
-                                    .font(.caption2)
-                                    .monospacedDigit()
-                                    .foregroundStyle(.secondary)
-                                Text(value.value.isEmpty ? "…" : value.value)
-                                    .font(.system(size: 12, weight: .semibold))
-                                    .lineLimit(2)
-                            }
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 10, weight: .semibold))
-                                .foregroundStyle(.tertiary)
+                    SearchResultRow(
+                        index: value.key,
+                        line: value.value,
+                        revealedIndex: $revealedIndex,
+                        onGo: {
+                            vm.goToHighlight(value.key)
                         }
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 8)
-                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
+                    )
                 }
             }
             .padding(12)
@@ -108,5 +93,78 @@ struct SidebarSearchPanelView: View {
 
     private var sortedSearchRows: [(key: Int, value: String)] {
         vm.searchIndexs.sorted { $0.key < $1.key }
+    }
+}
+
+private struct SearchResultRow: View {
+    let index: Int
+    let line: String
+    @Binding var revealedIndex: Int?
+    let onGo: () -> Void
+
+    private let actionWidth: CGFloat = 56
+
+    private var isRevealed: Bool {
+        revealedIndex == index
+    }
+
+    private var restingOffset: CGFloat {
+        isRevealed ? -actionWidth : 0
+    }
+
+    var body: some View {
+        ZStack(alignment: .trailing) {
+            actionButtons
+            rowContent
+        }
+        .animation(.spring(response: 0.25, dampingFraction: 0.85), value: isRevealed)
+    }
+
+    private var rowContent: some View {
+        HStack(spacing: 10) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("#\(index)")
+                    .font(.caption2)
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+                Text(line.isEmpty ? "…" : line)
+                    .font(.system(size: 12, weight: .semibold))
+                    .lineLimit(2)
+            }
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(.tertiary)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .contentShape(Rectangle())
+        .offset(x: restingOffset)
+        .onTapGesture {
+            revealedIndex = isRevealed ? nil : index
+        }
+    }
+
+    private var actionButtons: some View {
+        HStack(spacing: 0) {
+            Button(action: {
+                revealedIndex = nil
+                onGo()
+            }) {
+                VStack(spacing: 4) {
+                    Image(systemName: "arrow.turn.down.right")
+                        .font(.system(size: 12, weight: .semibold))
+                    Text("Go")
+                        .font(.caption2)
+                }
+                .frame(width: actionWidth, height: 44)
+                .foregroundStyle(.white)
+                .background(Color.accentColor, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.trailing, 6)
+        .opacity(isRevealed ? 1 : 0)
     }
 }
