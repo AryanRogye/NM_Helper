@@ -31,12 +31,14 @@ final class NMViewModel {
 
     /// Current Screen
     var currentScreen: Screens = .addView
+
+    var currentIndex: Int?
     
     /// Current Workspace Stuff
     var selectedWorkspace: Workspace?
     var selectedChunks: [String] = []
     
-    var selectedWorkspaceSymbols: [Symbols] = []
+    var selectedWorkspaceSymbols: [Int: Symbols] = [:]
     
     var selectedSize: Int? = nil
     var selectedMaxSize: Int? = nil
@@ -286,12 +288,14 @@ extension NMViewModel {
             var foundSymbols: [Symbols] = []
             
             let resultsBySymbol = nmcore.multiGrep(symbols, in: full)
+            let nsFull = full as NSString
             for i in 0..<count {
                 let type = SymbolType.allCases[i]
                 let key = symbols[i]
                 let indices = resultsBySymbol[key] ?? []
                 for idx in indices {
-                    foundSymbols.append(Symbols(symbolType: type, index: idx))
+                    let lineRange = nsFull.lineRange(for: NSRange(location: idx, length: 0))
+                    foundSymbols.append(Symbols(symbolType: type, index: lineRange.location))
                 }
             }
             
@@ -308,8 +312,9 @@ extension NMViewModel {
                 start = next
                 
                 await MainActor.run {
-                    self.selectedWorkspaceSymbols.append(contentsOf: batch)
-                    // or set a progress % here if you want
+                    for s in batch {
+                        self.selectedWorkspaceSymbols[s.index] = s
+                    }
                 }
                 
                 // slow it down + let UI breathe

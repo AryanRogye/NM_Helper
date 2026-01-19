@@ -19,6 +19,10 @@ final class HighlightModel {
         return NSRange(location: index, length: 1)
     }
     
+    nonisolated func index(for range: NSRange) -> Int {
+        return range.location
+    }
+    
     public func highlight(_ index: Int, filterText: String) {
         let r = rangeFor(index: index)
         updateHighlightedRanges(r, filterText)

@@ -18,10 +18,14 @@ final class TextViewDelegate: NSObject, NSTextViewDelegate, ObservableObject {
     weak var textView: NSTextView?
     let fontManager = NSFontManager.shared
 
+    var currentIndex: Binding<Int?> = .constant(0)
     var text: Binding<String> = .constant("")
     var font: Binding<CGFloat> = .constant(0)
     var isBold: Binding<Bool> = .constant(false)
     
+    public func observeCurrentIndex(_ val: Binding<Int?>) {
+        self.currentIndex = val
+    }
     public func observeTextChange(_ val: Binding<String>) {
         self.text = val
     }
@@ -67,6 +71,16 @@ final class TextViewDelegate: NSObject, NSTextViewDelegate, ObservableObject {
     /// Calulating Range is the same as when our cursor updates
     private func calculateRange(_ textView: NSTextView) {
         let range: NSRange = textView.selectedRange
+        
+        let nsText = textView.string as NSString
+        if nsText.length == 0 {
+            self.currentIndex.wrappedValue = 0
+        } else {
+            let safeLocation = min(range.location, nsText.length - 1)
+            let lineRange = nsText.lineRange(for: NSRange(location: safeLocation, length: 0))
+            self.currentIndex.wrappedValue = lineRange.location
+        }
+        
         let hasSelection = range.length > 0
         // Use hasSelection (e.g., update UI, enable actions, etc.)
         if hasSelection {

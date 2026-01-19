@@ -27,11 +27,16 @@ struct SidebarSymbolView: View {
 // MARK: - Header
 extension SidebarSymbolView {
     private var headerView: some View {
-        HStack(spacing: 8) {
-            Text("Symbols Debug")
-                .font(.headline)
-            Spacer()
-            StatusPill(text: statusText, color: statusColor)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Text("Symbols Debug")
+                    .font(.headline)
+                Spacer()
+                StatusPill(text: statusText, color: statusColor)
+            }
+            if let currentIndex = vm.currentIndex {
+                currentIndexPanel(index: currentIndex, symbol: currentSymbol)
+            }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
@@ -125,9 +130,14 @@ extension SidebarSymbolView {
     }
 
     private var distinctTypeCount: Int {
-        Set(vm.selectedWorkspaceSymbols.map(\.symbolType)).count
+        Set(vm.selectedWorkspaceSymbols.values.map { $0.symbolType }).count
     }
 
+    private var currentSymbol: Symbols? {
+        guard let currentIndex = vm.currentIndex else { return nil }
+        return vm.selectedWorkspaceSymbols[currentIndex]
+    }
+    
     private var emptyStateTitle: String {
         if vm.isNMScanning || vm.isLoadingChunks {
             return "Loading nm output…"
@@ -146,10 +156,12 @@ extension SidebarSymbolView {
     }
 
     private var symbolGroups: [SymbolGroup] {
-        let grouped = Dictionary(grouping: vm.selectedWorkspaceSymbols, by: { $0.symbolType })
+        let grouped = Dictionary(grouping: vm.selectedWorkspaceSymbols.values) { $0.symbolType }
+        
         return SymbolType.allCases.compactMap { type in
             let symbols = grouped[type] ?? []
             if symbols.isEmpty && !showEmptyTypes { return nil }
+            
             let sorted = symbols.sorted { $0.index < $1.index }
             return SymbolGroup(type: type, symbols: sorted)
         }
@@ -170,6 +182,28 @@ extension SidebarSymbolView {
 }
 
 // MARK: - Pieces
+private struct CurrentIndexChip: View {
+    let title: String
+    let value: String
+    let accent: Color
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text(title)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .monospacedDigit()
+                .foregroundStyle(accent)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(.thinMaterial, in: Capsule())
+    }
+}
+
 private struct MetricChip: View {
     let title: String
     let value: String
@@ -201,6 +235,55 @@ private struct StatusPill: View {
             .padding(.vertical, 3)
             .foregroundStyle(color)
             .background(color.opacity(0.15), in: Capsule())
+    }
+}
+
+private extension SidebarSymbolView {
+    func currentIndexPanel(index: Int, symbol: Symbols?) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            currentIndexBarContent(index: index, symbol: symbol)
+            Divider()
+            debugSlotView
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 10)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+    }
+
+    func currentIndexBarContent(index: Int, symbol: Symbols?) -> some View {
+        HStack(spacing: 8) {
+            CurrentIndexChip(title: "Index", value: "#\(index)", accent: .primary)
+            if let symbol {
+                CurrentIndexChip(
+                    title: "Symbol",
+                    value: symbol.symbolType.rawValue.trimmingCharacters(in: .whitespaces),
+                    accent: .accentColor
+                )
+                Text(symbol.symbolType.description)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            } else {
+                CurrentIndexChip(title: "Symbol", value: "—", accent: .secondary)
+                Text("No symbol at this index")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+        }
+    }
+
+    var debugSlotView: some View {
+        HStack {
+            Text("Debug slot")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+            Spacer()
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 10)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }
 

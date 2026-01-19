@@ -8,6 +8,7 @@
 import SwiftUI
 
 public struct ComfyTextEditor: NSViewControllerRepresentable {
+    
 
     @State private var highlightModel = HighlightModel()
     /// Text to type into
@@ -22,6 +23,8 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
     @Binding var font: CGFloat
     @Binding var magnification: CGFloat
     @Binding var isBold       : Bool
+    
+    var currentIndex: Binding<Int?>
     
     /// Boolean if is in VimMode or not
     @Binding var isInVimMode: Bool
@@ -53,6 +56,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         chunks: Binding<[String]>,
         useChunks: Bool,
         highlightIndexRows: Binding<[Int: String]>? = nil,
+        currentIndex: Binding<Int?> = .constant(nil),
         filterText: Binding<String>? = nil,
         font: Binding<CGFloat> = .constant(0),
         isBold: Binding<Bool>,
@@ -86,6 +90,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         self.borderColor = borderColor
         self.onHighlightUpdated = onHighlightUpdated
         self.onHighlight = onHighlight
+        self.currentIndex = currentIndex
     }
     
     @State private var updateHighlightTask : Task<Void, Never>? = nil
@@ -127,6 +132,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         chunks: Binding<[String]>,
         highlightIndexRows: Binding<[Int: String]>? = nil,
         filterText: Binding<String>? = nil,
+        currentIndex: Binding<Int?> = .constant(nil),
         showScrollbar: Binding<Bool>,
         isInVimMode: Binding<Bool> = .constant(false),
         editorBackground: Color = .white,
@@ -141,6 +147,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
             chunks: chunks,
             useChunks: true,
             highlightIndexRows: highlightIndexRows,
+            currentIndex: currentIndex,
             filterText: filterText,
             font: .constant(0),
             isBold: .constant(false),
@@ -181,6 +188,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         viewController.vimBottomView.setBorderColor(color: NSColor(borderColor))
         
         /// Observe Text Changes
+        textViewDelegate.observeCurrentIndex(currentIndex)
         textViewDelegate.observeTextChange($text)
         textViewDelegate.observeFontChange($font)
         textViewDelegate.observeBoldUnderCursor($isBold)

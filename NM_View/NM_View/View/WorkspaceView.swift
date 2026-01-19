@@ -67,6 +67,7 @@ extension WorkspaceView {
             chunks: chunksBinding,
             highlightIndexRows: $vm.searchIndexs,
             filterText: $vm.filterText,
+            currentIndex: $vm.currentIndex,
             showScrollbar: .constant(false),
             onHighlightUpdated: { highlight in
                 vm.searchPercentageDone = highlight
