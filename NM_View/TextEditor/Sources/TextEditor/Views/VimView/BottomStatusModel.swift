@@ -15,7 +15,7 @@ final class HighlightModel {
     var updateHighlightedRanges: ((NSRange, String) -> Void) = { _, _ in }
     var resetHighlightedRanges: () -> Void = { }
     
-    func rangeFor(index: Int) -> NSRange {
+    nonisolated func rangeFor(index: Int) -> NSRange {
         return NSRange(location: index, length: 1)
     }
     

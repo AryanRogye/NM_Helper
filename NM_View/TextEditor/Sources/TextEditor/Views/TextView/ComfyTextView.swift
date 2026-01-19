@@ -30,6 +30,11 @@ final class ComfyTextView: NSTextView {
         self.addSubview(vimCursorView)
     }
     
+    public func goToRange(_ range: NSRange) {
+        self.scrollRangeToVisible(range)
+        self.setSelectedRange(range)
+    }
+    
     public func updateHighlightedRanges(range: NSRange, filterText: String) {
         guard let storage = self.textStorage else { return }
         

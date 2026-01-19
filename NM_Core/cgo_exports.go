@@ -18,11 +18,6 @@ func nm_free(ptr *C.char) {
 	C.free(unsafe.Pointer(ptr))
 }
 
-//export nm_free_int
-func nm_free_int(ptr []int) {
-	C.free(unsafe.Pointer(&ptr[0]))
-}
-
 //export nm_scan_file
 func nm_scan_file(filename *C.char) *C.char {
 	out := api.ScanFile(C.GoString(filename))

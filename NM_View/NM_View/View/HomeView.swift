@@ -13,15 +13,14 @@ struct HomeView: View {
     
     @Environment(\.modelContext) var ctx
     @State private var vm: NMViewModel
-    @State private var isSidebarVisible: Bool = true
     
     init() {
         vm = .init()
     }
     
     var body: some View {
-        SidebarLayout(isSidebarVisible: isSidebarVisible, minSidebarWidth: 240) {
-            Sidebar(vm: vm)
+        SidebarLayout(isSidebarVisible: vm.isSidebarVisible, minSidebarWidth: 240) {
+            SidebarTabContainer(vm: vm)
         } content: {
             VStack {
                 switch vm.currentScreen {
@@ -38,13 +37,11 @@ struct HomeView: View {
             .toolbar {
                 ToolbarItem(placement: .navigation) {
                     Button {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            isSidebarVisible.toggle()
-                        }
+                        vm.toggleSidebar()
                     } label: {
-                        Image(systemName: isSidebarVisible ? "sidebar.leading" : "sidebar.trailing")
+                        Image(systemName: vm.isSidebarVisible ? "sidebar.leading" : "sidebar.trailing")
                     }
-                    .help(isSidebarVisible ? "Hide Sidebar" : "Show Sidebar")
+                    .help(vm.isSidebarVisible ? "Hide Sidebar" : "Show Sidebar")
                     .keyboardShortcut("s", modifiers: [.command, .option])
                 }
 //                if let size = vm.size {

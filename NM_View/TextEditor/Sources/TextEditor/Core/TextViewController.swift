@@ -9,7 +9,7 @@ import AppKit
 import Combine
 import SwiftUI
 
-public class TextViewController: NSViewController, EditorCommands {
+public class TextViewController: NSViewController, EditorCommands, HighlightCommands {
 
     /// macOS Given font manager
     let fontManager = NSFontManager.shared
@@ -75,6 +75,21 @@ public class TextViewController: NSViewController, EditorCommands {
         }
     }
     
+    public func gotoHighlight(_ index: Int) {
+        self.textView.goToRange(
+            highlightModel.rangeFor(index: index)
+        )
+    }
+    public func gotoHighlight(_ range: NSRange) {
+        self.textView.goToRange(range)
+    }
+    
+    public func updateHighlightedRanges(index: Int, filterText: String) {
+        self.textView.updateHighlightedRanges(
+            range: highlightModel.rangeFor(index: index),
+            filterText: filterText
+        )
+    }
     public func updateHighlightedRanges(range: NSRange, filterText: String) {
         self.textView.updateHighlightedRanges(range: range, filterText: filterText)
     }

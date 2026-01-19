@@ -27,6 +27,7 @@
 - Prefer clean, readable code.
 - ViewModels: structure with `// MARK:` sections and extensions that tell a clear story.
 - Views: keep `var body: some View` small and concise; push subviews into `private var` blocks.
+- When adding new Swift files, ensure they are included in the Xcode target (Target Membership).
 
 ## Testing Guidelines
 - No app-level test suite is currently configured.

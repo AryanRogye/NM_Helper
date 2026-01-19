@@ -13,7 +13,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
     /// Text to type into
     @Binding var text: String
     @Binding var chunks: [String]
-    var highlightIndexRows: Binding<[Int]>?
+    var highlightIndexRows: Binding<[Int: String]>?
     var filterText: Binding<String>?
     
     var useChunks: Bool
@@ -39,8 +39,10 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
     let textViewDelegate = TextViewDelegate()
     let magnificationDelegate = MagnificationDelegate()
     
+    var onHighlight: (HighlightCommands) -> Void
     var onReady: (EditorCommands) -> Void
     var onSave : () -> Void
+    var onHighlightUpdated: (CGFloat) -> Void
     
     public final class Coordinator {
         var lastChunkCount: Int = 0
@@ -50,7 +52,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         text: Binding<String>,
         chunks: Binding<[String]>,
         useChunks: Bool,
-        highlightIndexRows: Binding<[Int]>? = nil,
+        highlightIndexRows: Binding<[Int: String]>? = nil,
         filterText: Binding<String>? = nil,
         font: Binding<CGFloat> = .constant(0),
         isBold: Binding<Bool>,
@@ -62,7 +64,9 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         editorForegroundStyle: Color = .black,
         borderColor: Color = Color.gray.opacity(0.3),
         onReady: @escaping (EditorCommands) -> Void = { _ in },
+        onHighlight: @escaping (HighlightCommands) -> Void = { _ in },
         onSave : @escaping () -> Void = { },
+        onHighlightUpdated: @escaping (CGFloat) -> Void = { _ in },
     ) {
         self.useChunks = useChunks
         self.highlightIndexRows = highlightIndexRows
@@ -80,7 +84,12 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         self.editorForegroundStyle = editorForegroundStyle
         self.borderRadius = borderRadius
         self.borderColor = borderColor
+        self.onHighlightUpdated = onHighlightUpdated
+        self.onHighlight = onHighlight
     }
+    
+    @State private var updateHighlightTask : Task<Void, Never>? = nil
+    @State private var lineCacheTask: Task<Void, Never>? = nil
     
     
     /// Convenience initializer for simple usage with only text + scrollbar bindings.
@@ -116,14 +125,16 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
     /// Convenience initializer for simple usage with only text + scrollbar bindings.
     public init(
         chunks: Binding<[String]>,
-        highlightIndexRows: Binding<[Int]>? = nil,
+        highlightIndexRows: Binding<[Int: String]>? = nil,
         filterText: Binding<String>? = nil,
         showScrollbar: Binding<Bool>,
         isInVimMode: Binding<Bool> = .constant(false),
         editorBackground: Color = .white,
         editorForegroundStyle: Color = .black,
         borderColor: Color = Color.gray.opacity(0.3),
-        borderRadius: CGFloat = 8
+        borderRadius: CGFloat = 8,
+        onHighlightUpdated: @escaping (CGFloat) -> Void = { _ in },
+        onHighlight: @escaping (HighlightCommands) -> Void = { _ in }
     ) {
         self.init(
             text: .constant(""),
@@ -141,7 +152,9 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
             editorForegroundStyle: editorForegroundStyle,
             borderColor: borderColor,
             onReady: { _ in },
-            onSave: { }
+            onHighlight: onHighlight,
+            onSave: { },
+            onHighlightUpdated: onHighlightUpdated,
         )
     }
     
@@ -154,6 +167,7 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
             onSave                : onSave
         )
         onReady(viewController)
+        onHighlight(viewController)
         if useChunks {
             viewController.textView.string = chunks.joined()
             context.coordinator.lastChunkCount = chunks.count
@@ -185,14 +199,75 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
         if useChunks {
             
             if let highlightIndexRows, let filterText {
-                let indices = highlightIndexRows.wrappedValue
+                let indices = highlightIndexRows.wrappedValue.keys.sorted()
                 if indices != highlightModel.indices {
+                    
+                    updateHighlightTask?.cancel()
+                    
                     highlightModel.resetHighlightedRanges()
-                    highlightModel.indices = highlightIndexRows.wrappedValue
-                    highlightModel.indices.forEach {
-                        highlightModel.highlight($0, filterText: filterText.wrappedValue)
+                    highlightModel.indices = indices
+                    let indices = highlightModel.indices
+                    
+                    DispatchQueue.main.async {
+                        updateHighlightTask = Task.detached(priority: .userInitiated) {
+                            
+                            var start = 0
+                            var batchSize = 300
+                            let total = indices.count
+                            
+                            while start < total {
+                                /// if task cancelled return
+                                if Task.isCancelled { return }
+                                
+                                /// end index is wherever we start + size of batch
+                                var end = start + batchSize
+                                
+                                /// normalize end if it needs to
+                                if end > indices.count {
+                                    end = indices.count
+                                }
+                                
+                                /// assign batch
+                                let batch = indices[start..<end]
+                                
+                                
+                                let ui_update_started = CFAbsoluteTimeGetCurrent()
+                                await MainActor.run {
+                                    for b in batch {
+                                        nsViewController.updateHighlightedRanges(
+                                            index: b,
+                                            filterText: filterText.wrappedValue
+                                        )
+                                    }
+                                }
+                                let ui_update_ended = (CFAbsoluteTimeGetCurrent() - ui_update_started) * 1000.0
+                                
+                                if ui_update_ended < 6 && batchSize < 2000 {
+                                    batchSize *= 2
+                                } else if ui_update_ended > 14, batchSize > 50 {
+                                    batchSize /= 2
+                                }
+                                
+                                /// set start
+                                start = end
+                                
+                                /// Calculate how many we did, start should be how much we have done till now
+                                let progress = CGFloat(start) / CGFloat(total)
+                                await MainActor.run {
+                                    onHighlightUpdated(progress)
+                                }
+
+                                try? await Task.sleep(nanoseconds: 10_000_000) // 30ms, tweak
+                            }
+                        }
                     }
+                    
                 }
+
+                populateHighlightLinesIfNeeded(
+                    highlightIndexRows: highlightIndexRows,
+                    text: nsViewController.textView.string
+                )
             }
             
             let newCount = chunks.count
@@ -253,6 +328,42 @@ public struct ComfyTextEditor: NSViewControllerRepresentable {
 
         if nsViewController.vimBottomView.layer?.borderColor != NSColor(borderColor).cgColor {
             nsViewController.vimBottomView.setBorderColor(color: NSColor(borderColor))
+        }
+    }
+
+    private func populateHighlightLinesIfNeeded(
+        highlightIndexRows: Binding<[Int: String]>,
+        text: String
+    ) {
+        let current = highlightIndexRows.wrappedValue
+        let missing = current.filter { $0.value.isEmpty }.map { $0.key }
+        guard !missing.isEmpty else { return }
+
+        let keysSnapshot = Set(current.keys)
+        let textSnapshot = text
+
+        lineCacheTask?.cancel()
+        
+        DispatchQueue.main.async {
+            lineCacheTask = Task.detached(priority: .userInitiated) {
+                var updated = current
+                let nsText = textSnapshot as NSString
+                
+                for index in missing {
+                    guard index >= 0, index < nsText.length else { continue }
+                    let range = nsText.lineRange(for: NSRange(location: index, length: 0))
+                    let line = nsText.substring(with: range)
+                        .trimmingCharacters(in: .newlines)
+                    updated[index] = line
+                }
+                
+                if Task.isCancelled { return }
+                
+                await MainActor.run {
+                    guard Set(highlightIndexRows.wrappedValue.keys) == keysSnapshot else { return }
+                    highlightIndexRows.wrappedValue = updated
+                }
+            }
         }
     }
 }

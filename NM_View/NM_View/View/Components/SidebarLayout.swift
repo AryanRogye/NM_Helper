@@ -37,39 +37,45 @@ struct SidebarLayout<Sidebar: View, Content: View>: View {
         ZStack {
             Color(nsColor: .windowBackgroundColor)
                 .ignoresSafeArea()
-            Group {
-                if isSidebarVisible {
-                    HStack(spacing: 0) {
-                        sidebar
-                            .frame(width: clampedSidebarWidth)
-                        
-                        Divider()
-                        
-                        DragHandle()
-                            .gesture(
-                                DragGesture()
-                                    .updating($dragDelta) { value, state, _ in
-                                        state = value.translation.width
-                                    }
-                                    .onEnded { value in
-                                        let next = sidebarWidth + value.translation.width
-                                        sidebarWidth = clamp(next)
-                                    }
-                            )
-                        
-                        content
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
-                } else {
-                    content
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
+            HStack(spacing: 0) {
+                sidebar
+                    .frame(width: sidebarWidthForVisibility)
+                    .opacity(isSidebarVisible ? 1 : 0)
+                    .allowsHitTesting(isSidebarVisible)
+                
+                Divider()
+                    .opacity(isSidebarVisible ? 1 : 0)
+                    .frame(width: isSidebarVisible ? nil : 0)
+                
+                DragHandle()
+                    .frame(width: isSidebarVisible ? 6 : 0)
+                    .opacity(isSidebarVisible ? 1 : 0)
+                    .allowsHitTesting(isSidebarVisible)
+                    .gesture(resizeGesture)
+                
+                content
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
     }
     
     private var clampedSidebarWidth: CGFloat {
         clamp(sidebarWidth + dragDelta)
+    }
+
+    private var sidebarWidthForVisibility: CGFloat {
+        isSidebarVisible ? clampedSidebarWidth : 0
+    }
+
+    private var resizeGesture: some Gesture {
+        DragGesture()
+            .updating($dragDelta) { value, state, _ in
+                state = value.translation.width
+            }
+            .onEnded { value in
+                let next = sidebarWidth + value.translation.width
+                sidebarWidth = clamp(next)
+            }
     }
     
     private func clamp(_ value: CGFloat) -> CGFloat {

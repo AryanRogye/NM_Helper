@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftData
+import TextEditor
 
 @Observable
 @MainActor
@@ -37,9 +38,16 @@ final class NMViewModel {
     var isNMScanning = false
     var isLoadingChunks = false
     
-    var searchIndexs: [Int] = []
+    var isSidebarVisible = true
+    var sidebarTab: SidebarTab = .sidebar
+    
+    var searchIndexs: [Int: String] = [:]
     var filterText: String = ""
-
+    /// whatever / 1.0
+    var searchPercentageDone: CGFloat?
+    
+    var highlightCommands: HighlightCommands?
+    
     var scanTask: Task<Void, Never>?
     var searchTask: Task<Void, Never>?
     
@@ -67,6 +75,28 @@ final class NMViewModel {
         self.isLoadingChunks = false
         self.searchIndexs.removeAll()
         self.filterText = ""
+        self.searchPercentageDone = nil
+    }
+}
+
+// MARK: - Highlight
+extension NMViewModel {
+    public func goToHighlight(_ index: Int) {
+        highlightCommands?.gotoHighlight(index)
+    }
+    public func clearHighlight() {
+        highlightCommands?.resetHighlightedRanges()
+    }
+}
+
+// MARK: - Sidebar
+extension NMViewModel {
+    public func toggleSidebar() {
+        isSidebarVisible.toggle()
+    }
+
+    public func selectSidebarTab(_ tab: SidebarTab) {
+        sidebarTab = tab
     }
 }
 
@@ -74,14 +104,21 @@ final class NMViewModel {
 extension NMViewModel {
     public func searchFilter(_ filter: String) {
         
-        if filter.isEmpty { return }
         searchTask?.cancel()
         self.searchIndexs.removeAll()
+        self.clearHighlight()
+        
+        if filter.isEmpty {
+            filterText = ""
+            searchPercentageDone = nil
+            return
+        }
         
         filterText = filter
         let chunks = selectedChunks.joined()
         
         searchTask = Task.detached(priority: .userInitiated) { [weak self] in
+            
             
             if Task.isCancelled { return }
             
@@ -110,8 +147,14 @@ extension NMViewModel {
             guard let self else { return }
             
             await MainActor.run { [indices] in
-                self.searchIndexs = indices
-                print("Updated Search Index's Count: \(indices.count)")
+                for i in indices {
+                    self.searchIndexs[i] = ""
+                }
+                
+                if !self.searchIndexs.isEmpty {
+                    self.isSidebarVisible = true
+                    self.selectSidebarTab(.panel)
+                }
             }
         }
     }

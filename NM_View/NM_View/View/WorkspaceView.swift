@@ -59,7 +59,6 @@ extension WorkspaceView {
     private var editorContainerView: some View {
         ZStack {
             editorView
-            loadingOverlayView
         }
     }
     
@@ -68,22 +67,15 @@ extension WorkspaceView {
             chunks: chunksBinding,
             highlightIndexRows: $vm.searchIndexs,
             filterText: $vm.filterText,
-            showScrollbar: .constant(false)
+            showScrollbar: .constant(false),
+            onHighlightUpdated: { highlight in
+                vm.searchPercentageDone = highlight
+            },
+            onHighlight: { highlightCommands in
+                vm.highlightCommands = highlightCommands
+            }
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-    
-    @ViewBuilder
-    private var loadingOverlayView: some View {
-        if vm.selectedChunks.isEmpty && vm.isLoadingChunks {
-            VStack(spacing: 8) {
-                ProgressView()
-                Text("Loading symbols…")
-                    .foregroundStyle(.secondary)
-            }
-            .padding(16)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        }
     }
 }
 
@@ -123,8 +115,15 @@ extension WorkspaceView {
         HStack(spacing: 6) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
-            TextField("Search", text: $searchQuery)
-                .textFieldStyle(.plain)
+            ZStack(alignment: .trailing) {
+                TextField("Search", text: $searchQuery)
+                    .textFieldStyle(.plain)
+                    .padding(.trailing, searchProgressFraction == nil ? 0 : 52)
+                if let progress = searchProgressFraction {
+                    searchProgressView(progress: progress)
+                        .padding(.trailing, 2)
+                }
+            }
         }
         .padding(.vertical, 6)
         .padding(.horizontal, 8)
@@ -132,6 +131,29 @@ extension WorkspaceView {
         .frame(width: 220)
         .onChange(of: searchQuery) { _, newValue in
             vm.searchFilter(newValue)
+        }
+    }
+
+    private var searchProgressFraction: Double? {
+        guard !vm.filterText.isEmpty,
+              let progress = vm.searchPercentageDone
+        else { return nil }
+        let clamped = min(max(Double(progress), 0), 1)
+        return clamped < 1 ? clamped : nil
+    }
+
+    private func searchProgressView(progress: Double) -> some View {
+        HStack(spacing: 4) {
+            Text(progress, format: .percent.precision(.fractionLength(0)))
+                .font(.caption2)
+                .monospacedDigit()
+                .foregroundStyle(.secondary)
+                .fixedSize()
+            
+            ProgressView(value: progress)
+                .progressViewStyle(CircularProgressStyle())
+                .frame(width: 16, height: 16)
+                .opacity(0.9)
         }
     }
 }
