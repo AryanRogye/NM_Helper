@@ -13,7 +13,7 @@ struct SidebarSearchPanelView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            headerView
+            pastSearchTerms
             Divider()
             contentView
         }
@@ -40,6 +40,13 @@ struct SidebarSearchPanelView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
+    }
+    
+    @ViewBuilder
+    private var pastSearchTerms: some View {
+        if let w = vm.selectedWorkspace {
+            SidebarSearchTermsSection(vm: vm, workspace: w)
+        }
     }
 
     @ViewBuilder
@@ -93,6 +100,56 @@ struct SidebarSearchPanelView: View {
 
     private var sortedSearchRows: [(key: Int, value: String)] {
         vm.searchIndexs.sorted { $0.key < $1.key }
+    }
+}
+
+private struct SidebarSearchTermsSection: View {
+    @Bindable var vm: NMViewModel
+    @Bindable var workspace: Workspace
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            /// make sure filterText has text and searchIndex's are not empty
+            if !vm.filterText.isEmpty && !vm.searchIndexs.isEmpty {
+                HStack {
+                    Text("\(vm.filterText)")
+                        .font(.headline)
+                        .minimumScaleFactor(0.5)
+                        .lineLimit(1)
+                    Button{
+                        vm.addSearchTerm()
+                    } label: {
+                        Text("Save")
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+                
+                if workspace.searchTerms.isEmpty {
+                    Text("Next time you open up \(workspace.file.lastPathComponent) you can look it up underneath here")
+                        .font(.caption)
+                }
+            }
+            
+            if !workspace.searchTerms.isEmpty {
+                DisclosureGroup {
+                    ForEach(workspace.searchTerms, id: \.self) { term in
+                        HStack {
+                            Button {
+                                vm.searchFilter(term.term)
+                            } label: {
+                                Text(term.term)
+                                    .frame(maxWidth: .infinity)
+                            }
+                        }
+                    }
+                } label: {
+                    Text("Search")
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
     }
 }
 

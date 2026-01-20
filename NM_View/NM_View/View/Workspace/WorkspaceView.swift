@@ -54,7 +54,7 @@ extension WorkspaceView {
             workspace: workspace,
             currentFlags: $currentFlags,
             onLoad: {
-                vm.nmSelect(workspace.file, flags: currentFlags)
+                vm.nmSelect(workspace, flags: currentFlags)
             }
         )
     }

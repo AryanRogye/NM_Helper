@@ -11,7 +11,7 @@ import nmcore
 // MARK: - NM
 extension NMViewModel {
     
-    public func nmSelect(_ url: URL, flags: [NMFlags]) {
+    public func nmSelect(_ workspace: Workspace, flags: [NMFlags]) {
         
         /// Check if is running, if we are return
         if isNMScanning { return }
@@ -21,7 +21,7 @@ extension NMViewModel {
         scanTask?.cancel()
         
         /// store path once
-        let path = url.path
+        let path = workspace.file.path
         
         /// set flags to true locking this function
         isNMScanning = true
@@ -36,6 +36,8 @@ extension NMViewModel {
         let chunkSize = self.chunkSize
         let flags = flags
         
+        
+        selectedWorkspace = workspace
         
         let nmcore = nmcore
         scanTask = Task.detached(priority: .userInitiated) { [path] in
@@ -61,10 +63,7 @@ extension NMViewModel {
                 try Task.checkCancellation()
                 
                 await MainActor.run { [result] in
-                    /// Create a workspace
-                    self.selectedWorkspace = Workspace(file: url)
                     self.selectedMaxSize = result.count
-                    
                     /// Scanning is done, chunking still remains
                     self.isNMScanning = false
                 }

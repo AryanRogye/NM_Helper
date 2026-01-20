@@ -19,22 +19,53 @@ struct HomeView: View {
     }
     
     var body: some View {
-        SidebarLayout(isSidebarVisible: vm.isSidebarVisible, minSidebarWidth: 400) {
-            SidebarTabContainer(vm: vm)
-        } content: {
-            VStack {
-                switch vm.currentScreen {
-                case .home:
-                    if let w = vm.selectedWorkspace {
-                        WorkspaceView(vm: vm, workspace: w)
-                    }
-                case .addView:
-                    AddView(vm: vm)
-                }
+        layoutView
+        .background(sidebarShortcutHandler)
+        .focusedSceneValue(\.sidebarToggleAction, SidebarToggleAction {
+            vm.toggleSidebar()
+        })
+        .focusedSceneValue(\.vimModeBinding, $vm.isInVimMode)
+        .focusedSceneValue(\.sidebarStyleBinding, $vm.sidebarStyle)
+    }
+}
+
+// MARK: - Layout
+extension HomeView {
+    @ViewBuilder
+    private var layoutView: some View {
+        switch vm.sidebarStyle {
+        case .custom:
+            SidebarLayout(isSidebarVisible: vm.isSidebarVisible, minSidebarWidth: 400) {
+                SidebarTabContainer(vm: vm)
+            } content: {
+                mainContentView
             }
-            .task { vm.bind(to: ctx) }
-            // MARK: - TOOLBAR
-            .toolbar {
+        case .navigationSplit:
+            NavigationSplitView(columnVisibility: splitVisibilityBinding) {
+                SidebarTabContainer(vm: vm)
+                    .navigationSplitViewColumnWidth(min: 280, ideal: 400, max: 520)
+            } detail: {
+                mainContentView
+            }
+            .navigationSplitViewStyle(.balanced)
+        }
+    }
+
+    private var mainContentView: some View {
+        VStack {
+            switch vm.currentScreen {
+            case .home:
+                if let w = vm.selectedWorkspace {
+                    WorkspaceView(vm: vm, workspace: w)
+                }
+            case .addView:
+                AddView(vm: vm)
+            }
+        }
+        .task { vm.bind(to: ctx) }
+        // MARK: - TOOLBAR
+        .toolbar {
+            if vm.sidebarStyle == .custom {
                 ToolbarItem(placement: .navigation) {
                     Button {
                         vm.toggleSidebar()
@@ -43,26 +74,37 @@ struct HomeView: View {
                     }
                     .help(vm.isSidebarVisible ? "Hide Sidebar" : "Show Sidebar")
                 }
-//                if let size = vm.size {
-//                    ToolbarItem(placement: .automatic) {
-//                        Text("Size: \(Int(size))")
-//                            .monospacedDigit()
-//                            .padding(.vertical, 8)
-//                    }
-//                }
             }
-            .background(
-                WindowAccessor { window in
-                    window.titleVisibility = .hidden
-                    window.titlebarAppearsTransparent = true
-                    window.isMovableByWindowBackground = true
-                }
-            )
         }
-        .focusedSceneValue(\.sidebarToggleAction, SidebarToggleAction {
+        .background(
+            WindowAccessor { window in
+                window.titleVisibility = .hidden
+                window.titlebarAppearsTransparent = true
+                window.isMovableByWindowBackground = true
+            }
+        )
+    }
+
+    private var splitVisibilityBinding: Binding<NavigationSplitViewVisibility> {
+        Binding(
+            get: { vm.isSidebarVisible ? .all : .detailOnly },
+            set: { newValue in
+                vm.isSidebarVisible = newValue != .detailOnly
+            }
+        )
+    }
+}
+
+private extension HomeView {
+    var sidebarShortcutHandler: some View {
+        Button("") {
             vm.toggleSidebar()
-        })
-        .focusedSceneValue(\.vimModeBinding, $vm.isInVimMode)
+        }
+        .keyboardShortcut("s", modifiers: [.command])
+        .buttonStyle(.plain)
+        .frame(width: 0, height: 0)
+        .opacity(0)
+        .accessibilityHidden(true)
     }
 }
 
@@ -89,5 +131,16 @@ extension FocusedValues {
     var vimModeBinding: Binding<Bool>? {
         get { self[VimModeBindingKey.self] }
         set { self[VimModeBindingKey.self] = newValue }
+    }
+}
+
+struct SidebarStyleBindingKey: FocusedValueKey {
+    typealias Value = Binding<SidebarStyle>
+}
+
+extension FocusedValues {
+    var sidebarStyleBinding: Binding<SidebarStyle>? {
+        get { self[SidebarStyleBindingKey.self] }
+        set { self[SidebarStyleBindingKey.self] = newValue }
     }
 }

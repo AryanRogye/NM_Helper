@@ -13,8 +13,9 @@ import nmcore
 @Observable
 @MainActor
 final class NMViewModel {
-
+    
     private static let vimModeDefaultsKey = "NMViewModel.vimModeEnabled"
+    private static let sidebarStyleDefaultsKey = "NMViewModel.sidebarStyle"
      
     /// CTX Required for swiftdata sync
     @ObservationIgnored
@@ -52,6 +53,11 @@ final class NMViewModel {
     
     var isSidebarVisible = true
     var sidebarTab: SidebarTab = .sidebar
+    var sidebarStyle: SidebarStyle = .custom {
+        didSet {
+            UserDefaults.standard.set(sidebarStyle.rawValue, forKey: Self.sidebarStyleDefaultsKey)
+        }
+    }
     var allowEdit = false
     var isInVimMode = false {
         didSet {
@@ -72,6 +78,13 @@ final class NMViewModel {
 
     init() {
         self.isInVimMode = UserDefaults.standard.bool(forKey: Self.vimModeDefaultsKey)
+        if let rawValue = UserDefaults.standard.string(forKey: Self.sidebarStyleDefaultsKey) {
+            if let style = SidebarStyle(rawValue: rawValue) {
+                self.sidebarStyle = style
+            } else if rawValue == "swiftUI" || rawValue == "appKit" {
+                self.sidebarStyle = .custom
+            }
+        }
     }
     
     /// Switch Screen
@@ -128,6 +141,21 @@ extension NMViewModel {
 
 // MARK: - Search
 extension NMViewModel {
+    
+    public func addSearchTerm() {
+        guard let selectedWorkspace else { return }
+        let term = filterText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !term.isEmpty else { return }
+        guard !selectedWorkspace.doesSearchTermExist(term) else { return }
+        selectedWorkspace.addSearchTerm(term)
+        do {
+            try ctx?.save()
+            print("sav")
+        } catch {
+            print("Failed to save search term: \(error)")
+        }
+    }
+    
     public func searchFilter(_ filter: String) {
         
         searchTask?.cancel()
@@ -189,5 +217,21 @@ extension NMViewModel {
         
         selectedWorkspace = workspace
         currentScreen = .home
+    }
+}
+
+enum SidebarStyle: String, CaseIterable, Identifiable {
+    case custom
+    case navigationSplit
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .custom:
+            return "Custom"
+        case .navigationSplit:
+            return "NavigationSplitView"
+        }
     }
 }
