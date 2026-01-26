@@ -60,8 +60,20 @@ extension WorkspaceView {
     }
 
     private var editorContainerView: some View {
-        ZStack {
-            editorView
+        VStack(spacing: 0) {
+            
+            GeometryReader { geo in
+                editorView
+                    .frame(
+                        width: vm.isInGridMode ? geo.size.width * 0.4 : geo.size.width,
+                        height: vm.isInGridMode ? geo.size.height * 0.4 : geo.size.height
+                    )
+                    .position(x: geo.size.width / 2, y: geo.size.height / 2)
+            }
+
+            if vm.isInGridMode {
+                
+            }
         }
     }
 
@@ -86,7 +98,6 @@ extension WorkspaceView {
                 }
             }
         )
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -104,6 +115,15 @@ extension WorkspaceView {
                         vm.searchFilter(newValue)
                     }
                 )
+            }
+        }
+        if !vm.doneInitialLoad {
+            ToolbarItem(placement: .automatic) {
+                Image(systemName: "arrow.triangle.2.circlepath")
+                    .symbolEffect(.rotate)
+                    .transition(.opacity)
+                    .animation(.easeOut(duration: 0.25), value: vm.doneInitialLoad)
+                
             }
         }
         if vm.isLoadingChunks,

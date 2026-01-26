@@ -20,12 +20,11 @@ struct HomeView: View {
     
     var body: some View {
         layoutView
-        .background(sidebarShortcutHandler)
-        .focusedSceneValue(\.sidebarToggleAction, SidebarToggleAction {
-            vm.toggleSidebar()
-        })
-        .focusedSceneValue(\.vimModeBinding, $vm.isInVimMode)
-        .focusedSceneValue(\.sidebarStyleBinding, $vm.sidebarStyle)
+            .background(sidebarShortcutHandler)
+            .focusedSceneValue(\.sidebarToggleAction, SidebarToggleAction {
+                vm.toggleSidebar()
+            })
+            .focusedSceneValue(\.vimModeBinding, $vm.isInVimMode)
     }
 }
 
@@ -33,22 +32,13 @@ struct HomeView: View {
 extension HomeView {
     @ViewBuilder
     private var layoutView: some View {
-        switch vm.sidebarStyle {
-        case .custom:
-            SidebarLayout(isSidebarVisible: vm.isSidebarVisible, minSidebarWidth: 400) {
-                SidebarTabContainer(vm: vm)
-            } content: {
-                mainContentView
-            }
-        case .navigationSplit:
-            NavigationSplitView(columnVisibility: splitVisibilityBinding) {
-                SidebarTabContainer(vm: vm)
-                    .navigationSplitViewColumnWidth(min: 280, ideal: 400, max: 520)
-            } detail: {
-                mainContentView
-            }
-            .navigationSplitViewStyle(.balanced)
+        NavigationSplitView(columnVisibility: splitVisibilityBinding) {
+            SidebarTabContainer(vm: vm)
+                .navigationSplitViewColumnWidth(min: 280, ideal: 400, max: 520)
+        } detail: {
+            mainContentView
         }
+        .navigationSplitViewStyle(.balanced)
     }
 
     private var mainContentView: some View {
@@ -65,15 +55,13 @@ extension HomeView {
         .task { vm.bind(to: ctx) }
         // MARK: - TOOLBAR
         .toolbar {
-            if vm.sidebarStyle == .custom {
-                ToolbarItem(placement: .navigation) {
-                    Button {
-                        vm.toggleSidebar()
-                    } label: {
-                        Image(systemName: vm.isSidebarVisible ? "sidebar.leading" : "sidebar.trailing")
-                    }
-                    .help(vm.isSidebarVisible ? "Hide Sidebar" : "Show Sidebar")
+            ToolbarItem(placement: .navigation) {
+                Button {
+                    vm.toggleSidebar()
+                } label: {
+                    Image(systemName: vm.isSidebarVisible ? "sidebar.leading" : "sidebar.trailing")
                 }
+                .help(vm.isSidebarVisible ? "Hide Sidebar" : "Show Sidebar")
             }
         }
         .background(
@@ -131,16 +119,5 @@ extension FocusedValues {
     var vimModeBinding: Binding<Bool>? {
         get { self[VimModeBindingKey.self] }
         set { self[VimModeBindingKey.self] = newValue }
-    }
-}
-
-struct SidebarStyleBindingKey: FocusedValueKey {
-    typealias Value = Binding<SidebarStyle>
-}
-
-extension FocusedValues {
-    var sidebarStyleBinding: Binding<SidebarStyle>? {
-        get { self[SidebarStyleBindingKey.self] }
-        set { self[SidebarStyleBindingKey.self] = newValue }
     }
 }

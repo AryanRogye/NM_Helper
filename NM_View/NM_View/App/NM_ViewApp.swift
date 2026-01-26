@@ -29,7 +29,6 @@ struct NM_ViewApp: App {
 private struct SidebarCommands: Commands {
     @FocusedValue(\.sidebarToggleAction) private var sidebarToggleAction
     @FocusedValue(\.vimModeBinding) private var vimModeBinding
-    @FocusedValue(\.sidebarStyleBinding) private var sidebarStyleBinding
 
     var body: some Commands {
         CommandGroup(replacing: .saveItem) {
@@ -45,16 +44,6 @@ private struct SidebarCommands: Commands {
             } else {
                 Button("Vim Mode") {}
                     .disabled(true)
-            }
-            
-            if let sidebarStyleBinding {
-                Toggle(
-                    "Use NavigationSplitView",
-                    isOn: Binding(
-                        get: { sidebarStyleBinding.wrappedValue == .navigationSplit },
-                        set: { sidebarStyleBinding.wrappedValue = $0 ? .navigationSplit : .custom }
-                    )
-                )
             }
         }
     }

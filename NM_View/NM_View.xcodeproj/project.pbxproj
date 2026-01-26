@@ -10,7 +10,6 @@
 		2A49DB9604F598F1E2BE68E6 /* SidebarTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 324FA9277D036FC15B100094 /* SidebarTab.swift */; };
 		91D622EFC7C6427986F5F2DE /* nmcore in Frameworks */ = {isa = PBXBuildFile; productRef = 9261D578B7814737A019625F /* nmcore */; };
 		9B097FC72F1DF0C10031B1B1 /* nmcore in Frameworks */ = {isa = PBXBuildFile; productRef = 9B097FC62F1DF0C10031B1B1 /* nmcore */; };
-		9B6287702F1C966E00180E93 /* SidebarLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6287642F1C966E00180E93 /* SidebarLayout.swift */; };
 		9B6287732F1C966E00180E93 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B62876A2F1C966E00180E93 /* HomeView.swift */; };
 		9B6287752F1C966E00180E93 /* NMViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B62876E2F1C966E00180E93 /* NMViewModel.swift */; };
 		9B6287762F1C966E00180E93 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9B6287692F1C966E00180E93 /* Assets.xcassets */; };
@@ -36,7 +35,6 @@
 /* Begin PBXFileReference section */
 		324FA9277D036FC15B100094 /* SidebarTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarTab.swift; sourceTree = "<group>"; };
 		83CEA54099D440598BE1BDB8 /* NMTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NMTextView.swift; sourceTree = "<group>"; };
-		9B6287642F1C966E00180E93 /* SidebarLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarLayout.swift; sourceTree = "<group>"; };
 		9B6287692F1C966E00180E93 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9B62876A2F1C966E00180E93 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		9B62876B2F1C966E00180E93 /* NM_View.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = NM_View.entitlements; sourceTree = "<group>"; };
@@ -80,7 +78,6 @@
 				9B6288B62F1D4B9900180E93 /* CircularProgressStyle.swift */,
 				9B6287C22F1CA14A00180E93 /* WindowAccessor.swift */,
 				83CEA54099D440598BE1BDB8 /* NMTextView.swift */,
-				9B6287642F1C966E00180E93 /* SidebarLayout.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -257,7 +254,6 @@
 				3C49645C44C74353A62BDA4D /* WorkspaceEmptyStateView.swift in Sources */,
 				1B2E89780EA6472B879CCFB0 /* WorkspaceToolbarViews.swift in Sources */,
 				B5B6B489A0D34339929635D1 /* NMTextView.swift in Sources */,
-				9B6287702F1C966E00180E93 /* SidebarLayout.swift in Sources */,
 				9B62883C2F1CBEC100180E93 /* AddView.swift in Sources */,
 				9B6289EA2F1DBCF500180E93 /* SidebarSearchPanelView.swift in Sources */,
 				9B6289EB2F1DBCF500180E93 /* SidebarWorkspaceTabView.swift in Sources */,

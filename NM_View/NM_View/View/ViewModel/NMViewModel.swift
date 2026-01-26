@@ -15,7 +15,6 @@ import nmcore
 final class NMViewModel {
     
     private static let vimModeDefaultsKey = "NMViewModel.vimModeEnabled"
-    private static let sidebarStyleDefaultsKey = "NMViewModel.sidebarStyle"
      
     /// CTX Required for swiftdata sync
     @ObservationIgnored
@@ -46,6 +45,7 @@ final class NMViewModel {
     var selectedSize: Int? = nil
     var selectedMaxSize: Int? = nil
 
+    var doneInitialLoad = false
     var isNMScanning = false
     var isLoadingChunks = false
     
@@ -53,11 +53,6 @@ final class NMViewModel {
     
     var isSidebarVisible = true
     var sidebarTab: SidebarTab = .sidebar
-    var sidebarStyle: SidebarStyle = .custom {
-        didSet {
-            UserDefaults.standard.set(sidebarStyle.rawValue, forKey: Self.sidebarStyleDefaultsKey)
-        }
-    }
     var allowEdit = false
     var isInVimMode = false {
         didSet {
@@ -75,28 +70,24 @@ final class NMViewModel {
     var scanTask: Task<Void, Never>?
     var scanSymbolTask: Task<Void, Never>?
     var searchTask: Task<Void, Never>?
+    
+    var isInGridMode = false
 
     init() {
         self.isInVimMode = UserDefaults.standard.bool(forKey: Self.vimModeDefaultsKey)
-        if let rawValue = UserDefaults.standard.string(forKey: Self.sidebarStyleDefaultsKey) {
-            if let style = SidebarStyle(rawValue: rawValue) {
-                self.sidebarStyle = style
-            } else if rawValue == "swiftUI" || rawValue == "appKit" {
-                self.sidebarStyle = .custom
-            }
-        }
+    }
+    
+    public func allowGridLayoutForSearch() {
+        isInGridMode = true
     }
     
     /// Switch Screen
     public func switchScreens(to screen: Screens) {
         
-        /// if on home, and screen requested is add, and we have a task thats started
-        if currentScreen == .home,
-           screen == .addView {
-            self.clearWorkspace()
-        }
+        self.clearWorkspace()
         
         currentScreen = screen
+        print("Screen Switched To: \(screen)")
     }
     
     /// Clear Workspace
@@ -115,6 +106,7 @@ final class NMViewModel {
         self.searchPercentageDone = nil
         self.selectedWorkspaceSymbols.removeAll()
         self.isScanningSymbols = false
+        self.doneInitialLoad = false
     }
 }
 
@@ -202,6 +194,7 @@ extension NMViewModel {
         
         if selectedWorkspace == workspace { return }
         
+        clearWorkspace()
         selectedWorkspace = workspace
         currentScreen = .home
     }
@@ -217,21 +210,5 @@ extension NMViewModel {
         
         selectedWorkspace = workspace
         currentScreen = .home
-    }
-}
-
-enum SidebarStyle: String, CaseIterable, Identifiable {
-    case custom
-    case navigationSplit
-
-    var id: String { rawValue }
-
-    var title: String {
-        switch self {
-        case .custom:
-            return "Custom"
-        case .navigationSplit:
-            return "NavigationSplitView"
-        }
     }
 }

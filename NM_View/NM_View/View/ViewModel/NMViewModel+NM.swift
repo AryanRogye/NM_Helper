@@ -28,6 +28,7 @@ extension NMViewModel {
         isLoadingChunks = true
         
         /// clear
+        doneInitialLoad = false
         selectedChunks.removeAll()
         selectedMaxSize = nil
         selectedWorkspaceSymbols.removeAll(keepingCapacity: true)
@@ -55,12 +56,15 @@ extension NMViewModel {
             do {
                 
                 /// if task is called to get cancelled, cancel it
-                try Task.checkCancellation()
+                if Task.isCancelled { return }
                 
                 let result = try await nmcore.scanFile(path: path, options: flags)
+                await MainActor.run {
+                    self.doneInitialLoad = true
+                }
                 
                 /// check again if task got cancelled
-                try Task.checkCancellation()
+                if Task.isCancelled { return }
                 
                 await MainActor.run { [result] in
                     self.selectedMaxSize = result.count
@@ -82,89 +86,99 @@ extension NMViewModel {
     }
     
     nonisolated private func scanSymbols(result: String) async {
-        /// now we can start the symbol scan
-        await MainActor.run {
-            self.isLoadingChunks = false
-            self.isScanningSymbols = true
-        }
-        
-        let symbols = SymbolType.allCases.map(\.rawValue)   // [String]
-        let count = symbols.count
-        
-        var foundSymbols: [Symbols] = []
-        
-        let resultsBySymbol = nmcore.multiGrep(symbols, in: result)
-        let nsFull = result as NSString
-        for i in 0..<count {
-            let type = SymbolType.allCases[i]
-            let key = symbols[i]
-            let indices = resultsBySymbol[key] ?? []
-            for idx in indices {
-                let lineRange = nsFull.lineRange(for: NSRange(location: idx, length: 0))
-                foundSymbols.append(Symbols(symbolType: type, index: lineRange.location))
-            }
-        }
-        
-        /// now we can slowly update the ui
-        let batchSize = 100
-        var start = 0
-        let end = foundSymbols.count
-        
-        while start < end {
-            try? Task.checkCancellation()
-
-            let next = min(start + batchSize, end)
-            let batch = Array(foundSymbols[start..<next])
-            start = next
-            
+        do {
+            /// now we can start the symbol scan
             await MainActor.run {
-                for s in batch {
-                    self.selectedWorkspaceSymbols[s.index] = s
+                self.isLoadingChunks = false
+                self.isScanningSymbols = true
+            }
+            
+            let symbols = SymbolType.allCases.map(\.rawValue)   // [String]
+            let count = symbols.count
+            
+            var foundSymbols: [Symbols] = []
+            
+            let resultsBySymbol = nmcore.multiGrep(symbols, in: result)
+            let nsFull = result as NSString
+            for i in 0..<count {
+                let type = SymbolType.allCases[i]
+                let key = symbols[i]
+                let indices = resultsBySymbol[key] ?? []
+                for idx in indices {
+                    let lineRange = nsFull.lineRange(for: NSRange(location: idx, length: 0))
+                    foundSymbols.append(Symbols(symbolType: type, index: lineRange.location))
                 }
             }
             
-            // slow it down + let UI breathe
-            try? await Task.sleep(nanoseconds: 10_000_000) // 10ms
-            // or: await Task.yield()
+            /// now we can slowly update the ui
+            let batchSize = 100
+            var start = 0
+            let end = foundSymbols.count
+            
+            while start < end {
+                if Task.isCancelled { return }
+
+                
+                let next = min(start + batchSize, end)
+                let batch = Array(foundSymbols[start..<next])
+                start = next
+                
+                await MainActor.run {
+                    for s in batch {
+                        self.selectedWorkspaceSymbols[s.index] = s
+                    }
+                }
+                
+                // slow it down + let UI breathe
+                try await Task.sleep(nanoseconds: 10_000_000) // 10ms
+                // or: await Task.yield()
+            }
+        } catch {
+            
         }
     }
     
     nonisolated private func updateChunksUI(result: String, chunkSize: Int) async {
-        let full = result
-        var i = full.startIndex
-        
-        while i < full.endIndex {
+        do {
+            let full = result
+            var i = full.startIndex
             
-            try? Task.checkCancellation()
-
-            var batch: [String] = []
-            var batchSize = 0
-            /// 10 at a time
-            let batchCount = 10
-            
-            for _ in 0..<batchCount {
+            while i < full.endIndex {
                 
-                try? Task.checkCancellation()
+                if Task.isCancelled { return }
 
-                let next = full.index(
-                    i,
-                    offsetBy: chunkSize,
-                    limitedBy:
-                        full.endIndex
-                ) ?? full.endIndex
+                var batch: [String] = []
+                var batchSize = 0
+                /// 10 at a time
+                let batchCount = 10
                 
-                let chunk = String(full[i..<next])
-                i = next
-                batch.append(chunk)
-                batchSize += chunk.count
+                for _ in 0..<batchCount {
+                    
+                    if Task.isCancelled { return }
+                    
+                    let next = full.index(
+                        i,
+                        offsetBy: chunkSize,
+                        limitedBy:
+                            full.endIndex
+                    ) ?? full.endIndex
+                    
+                    let chunk = String(full[i..<next])
+                    i = next
+                    batch.append(chunk)
+                    batchSize += chunk.count
+                }
+                
+                await MainActor.run { [batch, batchSize] in
+                    if Task.isCancelled { return }
+                    self.selectedChunks.append(contentsOf: batch)
+                    self.selectedSize = (self.selectedSize ?? 0) + batchSize
+                }
+                
+                try await Task.sleep(nanoseconds: 10_000_000) // 30ms, tweak
             }
+        } catch {
             
-            await MainActor.run { [batch, batchSize] in
-                self.selectedChunks.append(contentsOf: batch)
-                self.selectedSize = (self.selectedSize ?? 0) + batchSize
-            }
-            
-            try? await Task.sleep(nanoseconds: 10_000_000) // 30ms, tweak
         }
     }
 }

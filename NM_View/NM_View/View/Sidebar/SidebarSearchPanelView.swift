@@ -61,6 +61,14 @@ struct SidebarSearchPanelView: View {
     private var indexListView: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 6) {
+                Button {
+                    vm.allowGridLayoutForSearch()
+                } label: {
+                    Text("Lay out search results in a grid")
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                        .frame(maxWidth: .infinity)
+                }
                 ForEach(sortedSearchRows, id: \.key) { value in
                     SearchResultRow(
                         index: value.key,
